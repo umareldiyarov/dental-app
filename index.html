@@ -10,7 +10,6 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>Мои пациенты</title>
 <script>
-// Inline PWA manifest
 const manifestData = {
   name: "Мои пациенты",
   short_name: "Пациенты",
@@ -47,10 +46,8 @@ html,body{height:100%;overflow:hidden}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark)}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 10%,rgba(232,196,184,.28) 0%,transparent 50%),radial-gradient(ellipse at 80% 90%,rgba(138,171,150,.18) 0%,transparent 50%);pointer-events:none;z-index:0}
 
-/* ── LAYOUT ── */
 .shell{position:fixed;inset:0;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
 
-/* TOP BAR */
 .topbar{flex-shrink:0;padding:env(safe-area-inset-top,14px) 18px 0;background:rgba(250,247,242,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,123,106,.1);z-index:10}
 .topbar-inner{display:flex;align-items:center;justify-content:space-between;padding-bottom:12px}
 .logo{display:flex;align-items:center;gap:9px}
@@ -62,7 +59,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .sync-btn.syncing{animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 
-/* STATS BAR */
 .statsbar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 16px;background:rgba(250,247,242,.95);flex-shrink:0}
 .sb{background:white;border-radius:12px;padding:9px 6px;text-align:center;box-shadow:0 1px 8px rgba(0,0,0,.04);position:relative;overflow:hidden}
 .sb::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--rose),var(--blush))}
@@ -71,19 +67,16 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .sb.g .sbn{color:var(--gold)}
 .sbl{font-size:10px;color:var(--lmid)}
 
-/* PAGES */
 .pages{flex:1;overflow:hidden;position:relative}
 .page{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px calc(var(--nav-h) + 20px);display:none}
 .page.active{display:block}
 
-/* BOTTOM NAV */
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));background:rgba(250,247,242,.97);backdrop-filter:blur(16px);border-top:1px solid rgba(201,123,106,.12);display:flex;align-items:flex-start;padding-top:8px;z-index:50}
 .nb{flex:1;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:'DM Sans',sans-serif;font-size:10px;color:var(--lmid);border-radius:14px;transition:all .2s;padding:6px 4px;position:relative}
 .nb.active{color:var(--rose)}
 .nb.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:28px;height:3px;background:var(--rose);border-radius:0 0 4px 4px}
 .ni{font-size:22px;line-height:1}
 
-/* REMINDER */
 .rbanner{background:linear-gradient(135deg,rgba(201,169,110,.12),rgba(232,196,184,.18));border:1px solid rgba(201,169,110,.25);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .ri{font-size:20px}
 .rt{flex:1}
@@ -96,13 +89,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 input:checked+.tsl{background:var(--gold)}
 input:checked+.tsl:before{transform:translateX(18px)}
 
-/* SEARCH */
 .sw{position:relative;margin-bottom:12px}
 .sw input{width:100%;padding:10px 14px 10px 36px;border:1.5px solid rgba(201,123,106,.14);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--dark);background:white;outline:none;-webkit-appearance:none}
 .sw input:focus{border-color:var(--rose);box-shadow:0 0 0 3px rgba(201,123,106,.1)}
 .sw-ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--lmid);font-size:14px;pointer-events:none}
 
-/* PATIENT CARD */
 .plist{display:flex;flex-direction:column;gap:10px}
 .pc{background:white;border-radius:16px;padding:14px 15px;box-shadow:0 2px 12px rgba(0,0,0,.05);position:relative;overflow:hidden;animation:fu .25s ease}
 @keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -119,7 +110,6 @@ input:checked+.tsl:before{transform:translateX(18px)}
 .pnote{font-size:12px;color:var(--lmid);margin-top:6px;padding-top:6px;border-top:1px solid var(--cream);font-style:italic}
 .nbadge{display:inline-flex;align-items:center;gap:3px;background:rgba(138,171,150,.12);color:var(--sage);border-radius:5px;padding:2px 7px;font-size:11px;margin-top:5px}
 
-/* STATUS BUTTONS */
 .status-row{display:flex;gap:5px;margin-top:8px}
 .sbs{flex:1;padding:7px 2px;border:1.5px solid transparent;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;background:var(--cream)}
 .sbs.w{color:#8a6820;border-color:rgba(201,169,110,.3)}
@@ -143,7 +133,6 @@ input:checked+.tsl:before{transform:translateX(18px)}
 .bwa:active{opacity:.85}
 .bedit:active,.brep:active,.bdel:active{opacity:.7}
 
-/* FORM */
 .acard{background:white;border-radius:18px;padding:20px;box-shadow:0 3px 20px rgba(0,0,0,.06);margin-bottom:12px}
 .acard-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:500;color:var(--mid);margin-bottom:16px}
 .fr{margin-bottom:12px}
@@ -159,11 +148,9 @@ textarea.fi{resize:none;height:70px;font-size:14px}
 .abtn:active{transform:scale(.98)}
 .abtn.secondary{background:white;color:var(--rose);border:1.5px solid var(--rose);box-shadow:none;margin-top:8px}
 
-/* CONFLICT WARNING */
 .warn{background:rgba(201,123,106,.1);border:1px solid rgba(201,123,106,.3);border-radius:10px;padding:9px 12px;font-size:13px;color:var(--drose);margin-bottom:10px;display:none}
 .warn.show{display:block}
 
-/* GOOGLE SHEETS SETUP */
 .setup-card{background:white;border-radius:18px;padding:20px;box-shadow:0 3px 20px rgba(0,0,0,.06);margin-bottom:12px;border:2px dashed rgba(138,171,150,.4)}
 .setup-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;color:var(--mid);margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .setup-desc{font-size:13px;color:var(--lmid);line-height:1.6;margin-bottom:14px}
@@ -172,7 +159,6 @@ textarea.fi{resize:none;height:70px;font-size:14px}
 .sbtn{padding:11px 14px;background:linear-gradient(135deg,#4a8a5e,#2d6b44);color:white;border:none;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
 .connected-badge{display:flex;align-items:center;gap:6px;background:rgba(138,171,150,.15);border:1px solid rgba(138,171,150,.3);border-radius:10px;padding:9px 12px;font-size:13px;color:#4a8a5e;font-weight:500}
 
-/* STATS PAGE */
 .sbig{background:white;border-radius:18px;padding:18px;box-shadow:0 3px 16px rgba(0,0,0,.05);margin-bottom:12px}
 .sbtitle{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--mid);margin-bottom:12px;font-weight:500}
 .ptabs{display:flex;gap:5px;margin-bottom:12px}
@@ -197,7 +183,6 @@ textarea.fi{resize:none;height:70px;font-size:14px}
 .eico{font-size:40px;margin-bottom:8px;opacity:.45}
 .etxt{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:300}
 
-/* MODAL */
 .mover{position:fixed;inset:0;background:rgba(42,31,26,.5);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-end;justify-content:center}
 .mover.open{display:flex}
 .modal{background:white;border-radius:22px 22px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px) + 32px);width:100%;max-width:480px;animation:mup .28s ease;position:relative;max-height:92vh;overflow-y:auto}
@@ -211,7 +196,6 @@ textarea.fi{resize:none;height:70px;font-size:14px}
 </head>
 <body>
 <div class="shell">
-  <!-- Top bar -->
   <div class="topbar">
     <div class="topbar-inner">
       <div class="logo">
@@ -224,13 +208,10 @@ textarea.fi{resize:none;height:70px;font-size:14px}
     </div>
   </div>
 
-  <!-- Stats -->
   <div class="statsbar" id="statsbar"></div>
 
-  <!-- Pages -->
   <div class="pages">
 
-    <!-- PAGE 0: TODAY -->
     <div class="page active" id="page0">
       <div class="rbanner">
         <div class="ri">⏰</div>
@@ -241,13 +222,11 @@ textarea.fi{resize:none;height:70px;font-size:14px}
       <div class="plist" id="listT"></div>
     </div>
 
-    <!-- PAGE 1: ALL -->
     <div class="page" id="page1">
       <div class="sw"><span class="sw-ico">🔍</span><input id="srchA" placeholder="Поиск по имени или телефону..." oninput="renderAll()"></div>
       <div class="plist" id="listA"></div>
     </div>
 
-    <!-- PAGE 2: ADD -->
     <div class="page" id="page2">
       <div class="acard">
         <div class="acard-title">✦ Новый пациент</div>
@@ -264,7 +243,6 @@ textarea.fi{resize:none;height:70px;font-size:14px}
       </div>
     </div>
 
-    <!-- PAGE 3: STATS -->
     <div class="page" id="page3">
       <div class="sbig">
         <div class="ptabs">
@@ -279,7 +257,6 @@ textarea.fi{resize:none;height:70px;font-size:14px}
       <div class="sbig"><div class="sbtitle">🔁 Постоянные пациенты</div><div id="repeatS"></div></div>
     </div>
 
-    <!-- PAGE 4: SETTINGS -->
     <div class="page" id="page4">
       <div class="acard">
         <div class="acard-title">☁️ Google Таблица</div>
@@ -326,9 +303,8 @@ textarea.fi{resize:none;height:70px;font-size:14px}
       </div>
     </div>
 
-  </div><!-- /pages -->
+  </div>
 
-  <!-- Bottom Nav -->
   <div class="bnav">
     <button class="nb active" id="nb0" onclick="setTab(0)"><span class="ni">📋</span>Сегодня</button>
     <button class="nb" id="nb1" onclick="setTab(1)"><span class="ni">👥</span>Все</button>
@@ -446,11 +422,34 @@ let rTimers = {};
 let curPeriod = 'week';
 let editId = null;
 let repeatId = null;
+let curTab = 0;
+
+// Обновляет statsbar в зависимости от текущей вкладки
+function refreshStats(){
+  if(curTab===0) renderStats('today');
+  else if(curTab===1) renderStats('all');
+}
+
+// FIX: синхронизация — защита от race condition
+let syncTimeout = null;
+function debouncedSync(){
+  clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(()=>syncNow(true), 600);
+}
 
 const s2=n=>String(n).padStart(2,'0');
 function today(){const d=new Date();return`${d.getFullYear()}-${s2(d.getMonth()+1)}-${s2(d.getDate())}`}
 function fmtD(ds){if(!ds)return'';const[,m,d]=ds.split('-');return`${parseInt(d)} ${MONTHS[parseInt(m)-1]}`}
 function save(){localStorage.setItem('dp4',JSON.stringify(pts))}
+
+// FIX: нормализация номера телефона — добавляем 996 если нет кода страны
+function normalizePhone(phone){
+  const digits = phone.replace(/\D/g,'');
+  if(digits.startsWith('996')) return digits;
+  if(digits.startsWith('0')) return '996' + digits.slice(1);
+  if(digits.length === 9) return '996' + digits;
+  return digits;
+}
 
 function init(){
   document.getElementById('iD').value=today();
@@ -459,13 +458,18 @@ function init(){
   document.getElementById('sheetUrl').value=sheetUrl;
   if(rOn) pts.forEach(schedR);
   updateSheetStatus();
-  renderStats(); renderAll();
+  refreshStats(); renderAll();
 }
 
 // ── TABS ──
 function setTab(i){
+  curTab=i;
   document.querySelectorAll('.nb').forEach((b,j)=>b.classList.toggle('active',i===j));
   document.querySelectorAll('.page').forEach((p,j)=>p.classList.toggle('active',i===j));
+  // Statsbar показываем только на вкладках "Сегодня" (0) и "Все" (1)
+  document.getElementById('statsbar').style.display=(i===0||i===1)?'grid':'none';
+  if(i===0) renderStats('today');
+  if(i===1) renderStats('all');
   if(i===3) renderSP();
 }
 
@@ -496,11 +500,14 @@ function addP(){
   const pr=parseFloat(document.getElementById('iPr').value)||0;
   if(!n||!p||!d||!t){showT('⚠️ Заполните имя, телефон, дату и время');return}
   if(hasConflict(d,t)){showT('⚠️ На это время уже есть запись!');return}
-  const pt={id:Date.now(),name:n,phone:p,date:d,time:t,notes:nt,price:pr,notified:false,createdAt:new Date().toISOString()};
+
+  // FIX: гарантируем уникальный id даже при быстром добавлении
+  const newId = Date.now() + Math.floor(Math.random()*1000);
+  const pt={id:newId,name:n,phone:p,date:d,time:t,notes:nt,price:pr,notified:false,createdAt:new Date().toISOString()};
   pts.push(pt); save();
   if(rOn) schedR(pt);
-  syncNow(true);
-  renderStats(); renderAll();
+  debouncedSync();
+  refreshStats(); renderAll();
   showT('✅ Пациент добавлен');
   ['iN','iP','iT','iNt','iPr'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('iD').value=today();
@@ -511,7 +518,9 @@ function addP(){
 // ── DELETE ──
 function delP(id){
   if(confirm('Удалить запись?')){
-    pts=pts.filter(p=>p.id!==id);save();syncNow(true);renderStats();renderAll();showT('🗑 Запись удалена');
+    // FIX: очищаем таймер напоминания при удалении
+    if(rTimers[id]){ clearTimeout(rTimers[id]); delete rTimers[id]; }
+    pts=pts.filter(p=>p.id!==id);save();debouncedSync();refreshStats();renderAll();showT('🗑 Запись удалена');
   }
 }
 
@@ -538,17 +547,19 @@ function saveEdit(){
   p.date=d; p.time=t;
   p.notes=document.getElementById('eNt').value.trim();
   p.price=parseFloat(document.getElementById('ePr').value)||0;
-  save(); syncNow(true); closeEdit(); renderStats(); renderAll();
+  // FIX: перепланируем таймер напоминания после редактирования
+  if(rOn) schedR(p);
+  save(); debouncedSync(); closeEdit(); refreshStats(); renderAll();
   showT('✅ Изменения сохранены');
 }
 
-// ── NOTIFY WhatsApp only ──
+// ── NOTIFY WhatsApp ──
 function sendWA(id){
   const p=pts.find(x=>x.id===id);if(!p)return;
   const msg=encodeURIComponent(`Здравствуйте, ${p.name}! 🦷\n\nНапоминаем о вашем визите к стоматологу сегодня в ${p.time}.\n\nБудем рады вас видеть! 😊`);
-  window.open(`https://wa.me/${p.phone.replace(/\D/g,'')}?text=${msg}`,'_blank');
-  const pt=pts.find(x=>x.id===id);
-  if(pt){pt.notified=true;save();syncNow(true);renderStats();renderAll();showT('📨 Напоминание отправлено')}
+  // FIX: нормализуем номер телефона для корректной ссылки wa.me
+  window.open(`https://wa.me/${normalizePhone(p.phone)}?text=${msg}`,'_blank');
+  p.notified=true;save();debouncedSync();refreshStats();renderAll();showT('📨 Напоминание отправлено');
 }
 
 // ── REPEAT ──
@@ -569,9 +580,10 @@ function confirmRepeat(){
   const d=document.getElementById('rD').value,t=document.getElementById('rT').value;
   if(!d||!t){showT('⚠️ Укажите дату и время');return}
   if(hasConflict(d,t)){showT('⚠️ На это время уже есть запись!');return}
-  const pt={id:Date.now(),name:document.getElementById('rN').value,phone:document.getElementById('rPh').value,date:d,time:t,notes:document.getElementById('rNt').value,price:parseFloat(document.getElementById('rPr').value)||0,notified:false,createdAt:new Date().toISOString()};
+  const newId = Date.now() + Math.floor(Math.random()*1000);
+  const pt={id:newId,name:document.getElementById('rN').value,phone:document.getElementById('rPh').value,date:d,time:t,notes:document.getElementById('rNt').value,price:parseFloat(document.getElementById('rPr').value)||0,notified:false,createdAt:new Date().toISOString()};
   pts.push(pt);save();if(rOn)schedR(pt);
-  syncNow(true);closeRepeat();renderStats();renderAll();showT('🔁 Записан на повторный визит');setTab(0);
+  debouncedSync();closeRepeat();refreshStats();renderAll();showT('🔁 Записан на повторный визит');setTab(0);
 }
 
 // ── REMINDER ──
@@ -646,7 +658,13 @@ function importData(e){
       const data=JSON.parse(ev.target.result);
       if(data.patients&&Array.isArray(data.patients)){
         if(confirm(`Восстановить ${data.patients.length} записей? Текущие данные будут заменены.`)){
-          pts=data.patients;save();renderStats();renderAll();showT('✅ Данные восстановлены');
+          // FIX: при импорте сбрасываем все таймеры и перепланируем заново
+          Object.values(rTimers).forEach(t=>clearTimeout(t));
+          rTimers={};
+          pts=data.patients;
+          save();
+          if(rOn) pts.forEach(schedR);
+          refreshStats();renderAll();showT('✅ Данные восстановлены');
         }
       }else showT('⚠️ Неверный формат файла');
     }catch{showT('⚠️ Ошибка чтения файла')}
@@ -656,41 +674,47 @@ function importData(e){
 }
 
 // ── RENDER ──
-function renderStats(){
+function renderStats(mode){
+  // mode='today' — только сегодня (вкладка Сегодня)
+  // mode='all'   — все записи за всё время (вкладка Все)
   const t=today();
-  const tp=pts.filter(p=>p.date===t);
-  const earned=tp.filter(p=>p.procStatus==='done').reduce((s,p)=>s+(p.price||0),0);
-  const pending=tp.filter(p=>p.visitStatus!=='notcame'&&p.procStatus!=='done').reduce((s,p)=>s+(p.price||0),0);
+  const src = (mode==='all') ? pts : pts.filter(p=>p.date===t);
+  const earned=src.filter(p=>p.procStatus==='done').reduce((s,p)=>s+(p.price||0),0);
+  const pending=src.filter(p=>p.visitStatus!=='notcame'&&p.procStatus!=='done').reduce((s,p)=>s+(p.price||0),0);
+  const label1 = (mode==='all') ? 'Всего' : 'Сегодня';
   document.getElementById('statsbar').innerHTML=`
-    <div class="sb"><div class="sbn">${tp.length}</div><div class="sbl">Сегодня</div></div>
-    <div class="sb"><div class="sbn">${tp.filter(p=>p.notified).length}</div><div class="sbl">Оповещены</div></div>
+    <div class="sb"><div class="sbn">${src.length}</div><div class="sbl">${label1}</div></div>
+    <div class="sb"><div class="sbn">${src.filter(p=>p.notified).length}</div><div class="sbl">Оповещены</div></div>
     <div class="sb g"><div class="sbn" style="font-size:${earned>=10000?'14px':earned>=1000?'17px':'20px'}">${earned>=1000?(earned/1000).toFixed(1).replace('.0','')+'к':earned||0}</div><div class="sbl">Заработано</div></div>
     <div class="sb" style="position:relative;overflow:hidden"><div class="sbn" style="color:var(--lmid);font-size:${pending>=10000?'14px':pending>=1000?'17px':'20px'}">${pending>=1000?(pending/1000).toFixed(1).replace('.0','')+'к':pending||0}</div><div class="sbl">Предварит.</div><div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--lmid),var(--blush))"></div></div>`;
 }
 
 function renderAll(){
+  // FIX: вычисляем today() один раз на весь рендер
   const t=today();
   const sq=(document.getElementById('srchT').value||'').toLowerCase();
   const sa=(document.getElementById('srchA').value||'').toLowerCase();
 
   let tl=pts.filter(p=>p.date===t&&(!sq||p.name.toLowerCase().includes(sq)||p.phone.includes(sq))).sort((a,b)=>a.time.localeCompare(b.time));
-  document.getElementById('listT').innerHTML=tl.length?tl.map(p=>card(p,true)).join(''):`<div class="empty"><div class="eico">🌸</div><div class="etxt">На сегодня записей нет</div></div>`;
+  document.getElementById('listT').innerHTML=tl.length?tl.map(p=>card(p,true,t)).join(''):`<div class="empty"><div class="eico">🌸</div><div class="etxt">На сегодня записей нет</div></div>`;
 
   let al=[...pts].filter(p=>!sa||p.name.toLowerCase().includes(sa)||p.phone.includes(sa)).sort((a,b)=>b.date.localeCompare(a.date)||a.time.localeCompare(b.time));
   if(!al.length){document.getElementById('listA').innerHTML=`<div class="empty"><div class="eico">👤</div><div class="etxt">Пациентов пока нет</div></div>`;return}
   let html='',ld='';
   al.forEach(p=>{
+    // Разделитель: для сегодня показываем "Сегодня", для остальных — дату
     if(p.date!==ld){html+=`<div class="ddiv">${p.date===t?'📅 Сегодня':fmtD(p.date)}</div>`;ld=p.date}
-    html+=card(p,false);
+    html+=card(p,false,t);
   });
   document.getElementById('listA').innerHTML=html;
 }
 
 const WA_SVG=`<svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`;
 
-function card(p,isT){
+// FIX: принимаем todayStr как параметр вместо повторного вызова today()
+function card(p,isT,todayStr){
   const now=new Date(),dt=new Date(`${p.date}T${p.time}`);
-  const past=dt<now&&p.date!==today();
+  const past=dt<now&&p.date!==todayStr;
   const st=p.visitStatus||'waiting';
   const pr=p.procStatus||'';
   return`<div class="pc ${p.notified?'notified':''} ${past?'past':''}">
@@ -722,19 +746,20 @@ function setVisit(id,status){
   const p=pts.find(x=>x.id===id);if(!p)return;
   p.visitStatus=status;
   if(status!=='came') p.procStatus='';
-  save();syncNow(true);renderAll();
+  save();debouncedSync();renderAll();
   const labels={waiting:'⏳ Ожидается',came:'✅ Пришёл',notcame:'❌ Не пришёл'};
   showT(labels[status]);
 }
 function setProc(id,status){
   const p=pts.find(x=>x.id===id);if(!p)return;
-  p.procStatus=status;save();syncNow(true);renderStats();renderAll();
+  p.procStatus=status;save();debouncedSync();refreshStats();renderAll();
   showT(status==='done'?'🎉 Процедура завершена! Деньги добавлены':'🔧 В процессе');
 }
 function sendNoShow(id){
   const p=pts.find(x=>x.id===id);if(!p)return;
   const msg=encodeURIComponent(`Здравствуйте, ${p.name}! 🦷\n\nВы не пришли на запись сегодня в ${p.time}.\n\nХотите перезаписаться? Напишите нам и выберем удобное время 😊`);
-  window.open(`https://wa.me/${p.phone.replace(/\D/g,'')}?text=${msg}`,'_blank');
+  // FIX: нормализуем номер и здесь
+  window.open(`https://wa.me/${normalizePhone(p.phone)}?text=${msg}`,'_blank');
 }
 
 // ── STATS PAGE ──
@@ -744,6 +769,7 @@ function renderSP(){
   let days=[],filtered=pts;
   if(curPeriod==='week'){for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d)}filtered=pts.filter(p=>new Date(p.date)>=days[0]&&new Date(p.date)<=now)}
   else if(curPeriod==='month'){for(let i=29;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d)}filtered=pts.filter(p=>new Date(p.date)>=days[0]&&new Date(p.date)<=now)}
+  // При curPeriod==='all': days=[], filtered=pts (все данные, без фильтра по дате)
 
   if(days.length){
     const max=Math.max(1,...days.map(d=>{const ds=`${d.getFullYear()}-${s2(d.getMonth()+1)}-${s2(d.getDate())}`;return filtered.filter(p=>p.date===ds).length}));
@@ -754,6 +780,7 @@ function renderSP(){
       return`<div class="crow"><span class="clbl">${curPeriod==='week'?SDAYS[d.getDay()]:d.getDate()}</span><div class="cbar"><div class="cfill" style="width:${pct}%"><span class="cval">${cnt||''}</span></div></div></div>`;
     }).join('');
   } else {
+    // Режим "Всё время" — показываем последние 8 дней с данными
     const byD={};pts.forEach(p=>{byD[p.date]=(byD[p.date]||0)+1});
     const sorted=Object.entries(byD).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,8).reverse();
     const max=Math.max(1,...sorted.map(x=>x[1]));
@@ -764,7 +791,8 @@ function renderSP(){
   }
 
   const totalEarned=filtered.filter(p=>p.procStatus==='done').reduce((s,p)=>s+(p.price||0),0);
-  const totalPending=filtered.filter(p=>p.procStatus!=='done').reduce((s,p)=>s+(p.price||0),0);
+  // FIX: предварительная сумма — только не отменённые и незавершённые
+  const totalPending=filtered.filter(p=>p.visitStatus!=='notcame'&&p.procStatus!=='done').reduce((s,p)=>s+(p.price||0),0);
   const todayEarned=pts.filter(p=>p.date===today()&&p.procStatus==='done').reduce((s,p)=>s+(p.price||0),0);
   const wp=filtered.filter(p=>p.price>0&&p.procStatus==='done');
   document.getElementById('incomeS').innerHTML=`

@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Пациенты">
+<meta name="theme-color" content="#c97b6a">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Мои пациенты</title>
+<script>
+// Inline PWA manifest
+const manifestData = {
+  name: "Мои пациенты",
+  short_name: "Пациенты",
+  description: "Управление записями стоматолога",
+  start_url: "./",
+  display: "standalone",
+  background_color: "#faf7f2",
+  theme_color: "#c97b6a",
+  orientation: "portrait",
+  icons: [{
+    src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='36' fill='%23c97b6a'/><text y='140' x='28' font-size='130'>🦷</text></svg>",
+    sizes: "192x192",
+    type: "image/svg+xml",
+    purpose: "any maskable"
+  }]
+};
+const blob = new Blob([JSON.stringify(manifestData)], {type:'application/json'});
+const manifestUrl = URL.createObjectURL(blob);
+const link = document.createElement('link');
+link.rel = 'manifest';
+link.href = manifestUrl;
+document.currentScript.after(link);
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#faf7f2;--warm:#fff9f0;--rose:#c97b6a;--drose:#9e5a4b;
+  --blush:#e8c4b8;--sage:#8aab96;--dark:#2a1f1a;--mid:#6b4f45;
+  --lmid:#b89990;--gold:#c9a96e;--glite:#f0e0c0;
+  --nav-h:64px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark)}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 10%,rgba(232,196,184,.28) 0%,transparent 50%),radial-gradient(ellipse at 80% 90%,rgba(138,171,150,.18) 0%,transparent 50%);pointer-events:none;z-index:0}
+
+/* ── LAYOUT ── */
+.shell{position:fixed;inset:0;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
+
+/* TOP BAR */
+.topbar{flex-shrink:0;padding:env(safe-area-inset-top,14px) 18px 0;background:rgba(250,247,242,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,123,106,.1);z-index:10}
+.topbar-inner{display:flex;align-items:center;justify-content:space-between;padding-bottom:12px}
+.logo{display:flex;align-items:center;gap:9px}
+.logo-icon{font-size:24px;filter:drop-shadow(0 2px 6px rgba(201,123,106,.3))}
+.logo-text{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:500;color:var(--dark)}
+.logo-text span{color:var(--rose)}
+.sync-btn{display:flex;align-items:center;gap:5px;background:rgba(138,171,150,.15);color:#4a8a5e;border:1px solid rgba(138,171,150,.3);border-radius:50px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.sync-btn:active{background:rgba(138,171,150,.28)}
+.sync-btn.syncing{animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* STATS BAR */
+.statsbar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 16px;background:rgba(250,247,242,.95);flex-shrink:0}
+.sb{background:white;border-radius:12px;padding:9px 6px;text-align:center;box-shadow:0 1px 8px rgba(0,0,0,.04);position:relative;overflow:hidden}
+.sb::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--rose),var(--blush))}
+.sb.g::after{background:linear-gradient(90deg,var(--gold),#e8cc8a)}
+.sbn{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--rose);line-height:1;margin-bottom:2px}
+.sb.g .sbn{color:var(--gold)}
+.sbl{font-size:10px;color:var(--lmid)}
+
+/* PAGES */
+.pages{flex:1;overflow:hidden;position:relative}
+.page{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px calc(var(--nav-h) + 20px);display:none}
+.page.active{display:block}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));background:rgba(250,247,242,.97);backdrop-filter:blur(16px);border-top:1px solid rgba(201,123,106,.12);display:flex;align-items:flex-start;padding-top:8px;z-index:50}
+.nb{flex:1;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:'DM Sans',sans-serif;font-size:10px;color:var(--lmid);border-radius:14px;transition:all .2s;padding:6px 4px;position:relative}
+.nb.active{color:var(--rose)}
+.nb.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:28px;height:3px;background:var(--rose);border-radius:0 0 4px 4px}
+.ni{font-size:22px;line-height:1}
+
+/* REMINDER */
+.rbanner{background:linear-gradient(135deg,rgba(201,169,110,.12),rgba(232,196,184,.18));border:1px solid rgba(201,169,110,.25);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ri{font-size:20px}
+.rt{flex:1}
+.rtitle{font-size:13px;font-weight:500;color:var(--mid);margin-bottom:1px}
+.rsub{font-size:11px;color:var(--lmid)}
+.tog{position:relative;width:40px;height:22px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.tsl{position:absolute;inset:0;background:#ddd;border-radius:50px;cursor:pointer;transition:.3s}
+.tsl:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:white;border-radius:50%;transition:.3s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+input:checked+.tsl{background:var(--gold)}
+input:checked+.tsl:before{transform:translateX(18px)}
+
+/* SEARCH */
+.sw{position:relative;margin-bottom:12px}
+.sw input{width:100%;padding:10px 14px 10px 36px;border:1.5px solid rgba(201,123,106,.14);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--dark);background:white;outline:none;-webkit-appearance:none}
+.sw input:focus{border-color:var(--rose);box-shadow:0 0 0 3px rgba(201,123,106,.1)}
+.sw-ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--lmid);font-size:14px;pointer-events:none}
+
+/* PATIENT CARD */
+.plist{display:flex;flex-direction:column;gap:10px}
+.pc{background:white;border-radius:16px;padding:14px 15px;box-shadow:0 2px 12px rgba(0,0,0,.05);position:relative;overflow:hidden;animation:fu .25s ease}
+@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.pc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(to bottom,var(--rose),var(--blush));border-radius:3px 0 0 3px}
+.pc.notified::before{background:linear-gradient(to bottom,var(--sage),#7db88e)}
+.pc.past::before{background:#ddd}
+.ptop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+.pname{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:500;color:var(--dark);line-height:1.2;flex:1;margin-right:8px}
+.ptime{background:var(--cream);border:1px solid rgba(201,123,106,.18);border-radius:7px;padding:3px 9px;font-size:12px;font-weight:500;color:var(--rose);white-space:nowrap}
+.pc.past .ptime{color:#bbb;border-color:#eee}
+.pmeta{display:flex;flex-wrap:wrap;gap:8px;font-size:13px;color:var(--mid);margin-bottom:3px}
+.pmeta .m{color:var(--lmid)}
+.pprice{display:inline-flex;align-items:center;gap:3px;background:var(--glite);color:#8a6820;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:500;margin-top:3px}
+.pnote{font-size:12px;color:var(--lmid);margin-top:6px;padding-top:6px;border-top:1px solid var(--cream);font-style:italic}
+.nbadge{display:inline-flex;align-items:center;gap:3px;background:rgba(138,171,150,.12);color:var(--sage);border-radius:5px;padding:2px 7px;font-size:11px;margin-top:5px}
+
+/* STATUS BUTTONS */
+.status-row{display:flex;gap:5px;margin-top:8px}
+.sbs{flex:1;padding:7px 2px;border:1.5px solid transparent;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;background:var(--cream)}
+.sbs.w{color:#8a6820;border-color:rgba(201,169,110,.3)}
+.sbs.w.on{background:var(--glite);border-color:var(--gold);color:#7a5810}
+.sbs.c{color:#4a8a5e;border-color:rgba(138,171,150,.3)}
+.sbs.c.on{background:rgba(138,171,150,.25);border-color:var(--sage);color:#2d6b44}
+.sbs.n{color:var(--rose);border-color:rgba(201,123,106,.25)}
+.sbs.n.on{background:rgba(201,123,106,.15);border-color:var(--rose);color:var(--drose)}
+.proc-row{display:flex;gap:5px;margin-top:5px}
+.pbs{flex:1;padding:6px 2px;border:1.5px solid transparent;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;transition:all .2s;text-align:center;background:var(--cream)}
+.pbs.ip{color:#1a8ccc;border-color:rgba(42,171,238,.25)}
+.pbs.ip.on{background:rgba(42,171,238,.15);border-color:#2aabee;color:#1a6ea0}
+.pbs.dn{color:#4a8a5e;border-color:rgba(138,171,150,.25)}
+.pbs.dn.on{background:rgba(138,171,150,.25);border-color:var(--sage);color:#2d6b44}
+
+.pacts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.bwa{flex:1;min-width:0;padding:9px 8px;background:linear-gradient(135deg,#25d366,#128c7e);color:white;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px}
+.bedit{padding:9px 11px;background:rgba(201,169,110,.14);color:#8a6820;border:none;border-radius:9px;font-size:13px;cursor:pointer;transition:all .2s}
+.brep{padding:9px 10px;background:rgba(138,171,150,.14);color:#4a8a5e;border:none;border-radius:9px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;white-space:nowrap}
+.bdel{padding:9px 11px;background:rgba(201,123,106,.1);color:var(--rose);border:none;border-radius:9px;font-size:14px;cursor:pointer}
+.bwa:active{opacity:.85}
+.bedit:active,.brep:active,.bdel:active{opacity:.7}
+
+/* FORM */
+.acard{background:white;border-radius:18px;padding:20px;box-shadow:0 3px 20px rgba(0,0,0,.06);margin-bottom:12px}
+.acard-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:500;color:var(--mid);margin-bottom:16px}
+.fr{margin-bottom:12px}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.fl{display:block;font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--lmid);margin-bottom:5px}
+.fi{width:100%;padding:11px 13px;border:1.5px solid rgba(201,123,106,.15);border-radius:11px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--dark);background:var(--warm);outline:none;-webkit-appearance:none;transition:all .2s}
+.fi:focus{border-color:var(--rose);background:white;box-shadow:0 0 0 3px rgba(201,123,106,.1)}
+.fi::placeholder{color:var(--lmid);font-weight:300}
+textarea.fi{resize:none;height:70px;font-size:14px}
+.pw{position:relative}
+.cur{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--lmid);font-size:12px;pointer-events:none}
+.abtn{width:100%;padding:13px;background:linear-gradient(135deg,var(--rose),var(--drose));color:white;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;box-shadow:0 4px 14px rgba(201,123,106,.35);transition:all .2s}
+.abtn:active{transform:scale(.98)}
+.abtn.secondary{background:white;color:var(--rose);border:1.5px solid var(--rose);box-shadow:none;margin-top:8px}
+
+/* CONFLICT WARNING */
+.warn{background:rgba(201,123,106,.1);border:1px solid rgba(201,123,106,.3);border-radius:10px;padding:9px 12px;font-size:13px;color:var(--drose);margin-bottom:10px;display:none}
+.warn.show{display:block}
+
+/* GOOGLE SHEETS SETUP */
+.setup-card{background:white;border-radius:18px;padding:20px;box-shadow:0 3px 20px rgba(0,0,0,.06);margin-bottom:12px;border:2px dashed rgba(138,171,150,.4)}
+.setup-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;color:var(--mid);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.setup-desc{font-size:13px;color:var(--lmid);line-height:1.6;margin-bottom:14px}
+.setup-input-wrap{display:flex;gap:8px}
+.setup-input-wrap .fi{flex:1;font-size:13px}
+.sbtn{padding:11px 14px;background:linear-gradient(135deg,#4a8a5e,#2d6b44);color:white;border:none;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+.connected-badge{display:flex;align-items:center;gap:6px;background:rgba(138,171,150,.15);border:1px solid rgba(138,171,150,.3);border-radius:10px;padding:9px 12px;font-size:13px;color:#4a8a5e;font-weight:500}
+
+/* STATS PAGE */
+.sbig{background:white;border-radius:18px;padding:18px;box-shadow:0 3px 16px rgba(0,0,0,.05);margin-bottom:12px}
+.sbtitle{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--mid);margin-bottom:12px;font-weight:500}
+.ptabs{display:flex;gap:5px;margin-bottom:12px}
+.ptab{padding:5px 12px;border-radius:50px;border:1px solid rgba(201,123,106,.2);background:var(--cream);font-size:12px;color:var(--mid);cursor:pointer;transition:all .2s}
+.ptab.active{background:var(--rose);color:white;border-color:transparent}
+.cbw{display:flex;flex-direction:column;gap:7px}
+.crow{display:flex;align-items:center;gap:8px}
+.clbl{font-size:11px;color:var(--lmid);width:28px;text-align:right;flex-shrink:0}
+.cbar{flex:1;background:var(--cream);border-radius:50px;height:20px;overflow:hidden}
+.cfill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--rose),var(--blush));transition:width .5s ease;display:flex;align-items:center;padding-right:7px;justify-content:flex-end;min-width:24px}
+.cval{font-size:10px;color:white;font-weight:500}
+.irow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--cream)}
+.irow:last-child{border-bottom:none;padding-bottom:0}
+.ilbl{font-size:13px;color:var(--mid)}
+.ival{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold);font-weight:600}
+.ival.big{font-size:24px;color:var(--drose)}
+
+.ddiv{text-align:center;font-size:11px;color:var(--lmid);margin:5px 0 9px;display:flex;align-items:center;gap:7px}
+.ddiv::before,.ddiv::after{content:'';flex:1;height:1px;background:rgba(201,123,106,.13)}
+
+.empty{text-align:center;padding:40px 20px;color:var(--lmid)}
+.eico{font-size:40px;margin-bottom:8px;opacity:.45}
+.etxt{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:300}
+
+/* MODAL */
+.mover{position:fixed;inset:0;background:rgba(42,31,26,.5);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.mover.open{display:flex}
+.modal{background:white;border-radius:22px 22px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,0px) + 32px);width:100%;max-width:480px;animation:mup .28s ease;position:relative;max-height:92vh;overflow-y:auto}
+@keyframes mup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mtitle{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:500;color:var(--dark);margin-bottom:16px;text-align:center}
+.mclose{position:absolute;top:14px;right:16px;background:var(--cream);border:none;border-radius:50%;width:30px;height:30px;font-size:15px;cursor:pointer;color:var(--mid)}
+
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--dark);color:white;padding:10px 18px;border-radius:11px;font-size:14px;opacity:0;transition:all .28s;z-index:400;white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,.2);pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="shell">
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="logo">
+        <span class="logo-icon">🦷</span>
+        <span class="logo-text">Мои <span>пациенты</span></span>
+      </div>
+      <button class="sync-btn" id="syncBtn" onclick="syncNow()">
+        <span id="syncIco">☁️</span> <span id="syncTxt">Синхронизировать</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="statsbar" id="statsbar"></div>
+
+  <!-- Pages -->
+  <div class="pages">
+
+    <!-- PAGE 0: TODAY -->
+    <div class="page active" id="page0">
+      <div class="rbanner">
+        <div class="ri">⏰</div>
+        <div class="rt"><div class="rtitle">Автонапоминания</div><div class="rsub" id="rstatus">Уведомление за 1 час до приёма</div></div>
+        <label class="tog"><input type="checkbox" id="rtog" onchange="toggleR()"><span class="tsl"></span></label>
+      </div>
+      <div class="sw"><span class="sw-ico">🔍</span><input id="srchT" placeholder="Поиск..." oninput="renderAll()"></div>
+      <div class="plist" id="listT"></div>
+    </div>
+
+    <!-- PAGE 1: ALL -->
+    <div class="page" id="page1">
+      <div class="sw"><span class="sw-ico">🔍</span><input id="srchA" placeholder="Поиск по имени или телефону..." oninput="renderAll()"></div>
+      <div class="plist" id="listA"></div>
+    </div>
+
+    <!-- PAGE 2: ADD -->
+    <div class="page" id="page2">
+      <div class="acard">
+        <div class="acard-title">✦ Новый пациент</div>
+        <div class="warn" id="cwarn">⚠️ На это время уже есть запись!</div>
+        <div class="fr"><label class="fl">Имя пациента</label><input class="fi" id="iN" placeholder="Умар Элдияров" type="text"></div>
+        <div class="fr"><label class="fl">Номер телефона</label><input class="fi" id="iP" placeholder="+996 700 000 000" type="tel"></div>
+        <div class="fr2">
+          <div><label class="fl">Дата</label><input class="fi" id="iD" type="date" oninput="checkC()"></div>
+          <div><label class="fl">Время</label><input class="fi" id="iT" type="time" oninput="checkC()"></div>
+        </div>
+        <div class="fr"><label class="fl">Процедура / заметка</label><textarea class="fi" id="iNt" placeholder="Удаление, чистка, имплант..."></textarea></div>
+        <div class="fr"><label class="fl">Стоимость (сом)</label><div class="pw"><input class="fi" id="iPr" placeholder="0" type="number" min="0" style="padding-right:44px"><span class="cur">сом</span></div></div>
+        <button class="abtn" onclick="addP()">✦ Добавить пациента</button>
+      </div>
+    </div>
+
+    <!-- PAGE 3: STATS -->
+    <div class="page" id="page3">
+      <div class="sbig">
+        <div class="ptabs">
+          <button class="ptab active" onclick="setPeriod('week',this)">Неделя</button>
+          <button class="ptab" onclick="setPeriod('month',this)">Месяц</button>
+          <button class="ptab" onclick="setPeriod('all',this)">Всё время</button>
+        </div>
+        <div class="sbtitle">👥 Пациентов по дням</div>
+        <div class="cbw" id="chart"></div>
+      </div>
+      <div class="sbig"><div class="sbtitle">💰 Доходы</div><div id="incomeS"></div></div>
+      <div class="sbig"><div class="sbtitle">🔁 Постоянные пациенты</div><div id="repeatS"></div></div>
+    </div>
+
+    <!-- PAGE 4: SETTINGS -->
+    <div class="page" id="page4">
+      <div class="acard">
+        <div class="acard-title">☁️ Google Таблица</div>
+        <div id="sheetStatus"></div>
+        <div style="margin-top:14px">
+          <div class="fr"><label class="fl">URL скрипта (Apps Script)</label><input class="fi" id="sheetUrl" placeholder="https://script.google.com/macros/s/..." type="url" style="font-size:12px"></div>
+          <button class="abtn" onclick="saveSheetUrl()">💾 Сохранить</button>
+          <button class="abtn secondary" onclick="showInstructions()">📖 Инструкция по подключению</button>
+        </div>
+      </div>
+      <div class="acard" style="margin-top:0">
+        <div class="acard-title">📱 Установить как приложение</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:4px">
+          <div style="background:var(--cream);border-radius:12px;padding:13px">
+            <div style="font-size:13px;font-weight:500;color:var(--mid);margin-bottom:6px">🍎 iPhone (Safari)</div>
+            <div style="font-size:12px;color:var(--lmid);line-height:1.8">
+              1. Откройте ссылку в браузере <strong>Safari</strong><br>
+              2. Нажмите кнопку <strong>«Поделиться»</strong> (□↑) внизу экрана<br>
+              3. Прокрутите вниз → нажмите <strong>«На экран Домой»</strong><br>
+              4. Нажмите <strong>«Добавить»</strong> — иконка 🦷 появится на рабочем столе
+            </div>
+          </div>
+          <div style="background:var(--cream);border-radius:12px;padding:13px">
+            <div style="font-size:13px;font-weight:500;color:var(--mid);margin-bottom:6px">🤖 Android (Chrome)</div>
+            <div style="font-size:12px;color:var(--lmid);line-height:1.8">
+              1. Откройте ссылку в браузере <strong>Chrome</strong><br>
+              2. Нажмите <strong>⋮</strong> (три точки) в правом верхнем углу<br>
+              3. Выберите <strong>«Добавить на главный экран»</strong><br>
+              4. Нажмите <strong>«Добавить»</strong> — иконка 🦷 появится как приложение
+            </div>
+          </div>
+          <div style="background:rgba(138,171,150,.1);border:1px solid rgba(138,171,150,.25);border-radius:12px;padding:12px;font-size:12px;color:#4a8a5e;line-height:1.6">
+            💡 После установки приложение открывается без адресной строки — как настоящее приложение
+          </div>
+        </div>
+      </div>
+
+      <div class="acard" style="margin-top:0">
+        <div class="acard-title">💾 Резервная копия</div>
+        <p style="font-size:13px;color:var(--lmid);margin-bottom:14px;line-height:1.6">Скачать все записи на телефон как файл. Можно восстановить если что-то случится.</p>
+        <button class="abtn" onclick="exportData()">⬇️ Скачать backup</button>
+        <button class="abtn secondary" onclick="document.getElementById('importFile').click()">⬆️ Восстановить из backup</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
+    </div>
+
+  </div><!-- /pages -->
+
+  <!-- Bottom Nav -->
+  <div class="bnav">
+    <button class="nb active" id="nb0" onclick="setTab(0)"><span class="ni">📋</span>Сегодня</button>
+    <button class="nb" id="nb1" onclick="setTab(1)"><span class="ni">👥</span>Все</button>
+    <button class="nb" id="nb2" onclick="setTab(2)"><span class="ni">➕</span>Добавить</button>
+    <button class="nb" id="nb3" onclick="setTab(3)"><span class="ni">📊</span>Статистика</button>
+    <button class="nb" id="nb4" onclick="setTab(4)"><span class="ni">⚙️</span>Настройки</button>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="mover" id="editModal">
+  <div class="modal">
+    <button class="mclose" onclick="closeEdit()">✕</button>
+    <div class="mtitle">✏️ Редактировать</div>
+    <div class="warn" id="editWarn">⚠️ На это время уже есть запись!</div>
+    <div class="fr"><label class="fl">Имя</label><input class="fi" id="eN" type="text"></div>
+    <div class="fr"><label class="fl">Телефон</label><input class="fi" id="ePh" type="tel"></div>
+    <div class="fr2">
+      <div><label class="fl">Дата</label><input class="fi" id="eD" type="date" oninput="checkEditC()"></div>
+      <div><label class="fl">Время</label><input class="fi" id="eT" type="time" oninput="checkEditC()"></div>
+    </div>
+    <div class="fr"><label class="fl">Процедура / заметка</label><textarea class="fi" id="eNt"></textarea></div>
+    <div class="fr"><label class="fl">Стоимость</label><div class="pw"><input class="fi" id="ePr" type="number" style="padding-right:44px"><span class="cur">сом</span></div></div>
+    <button class="abtn" onclick="saveEdit()">💾 Сохранить изменения</button>
+  </div>
+</div>
+
+<!-- REPEAT MODAL -->
+<div class="mover" id="repeatModal">
+  <div class="modal">
+    <button class="mclose" onclick="closeRepeat()">✕</button>
+    <div class="mtitle">🔁 Повторный визит</div>
+    <div class="warn" id="rwarn">⚠️ На это время уже есть запись!</div>
+    <div class="fr"><label class="fl">Имя</label><input class="fi" id="rN" readonly style="background:#f5f0eb"></div>
+    <div class="fr"><label class="fl">Телефон</label><input class="fi" id="rPh" readonly style="background:#f5f0eb"></div>
+    <div class="fr2">
+      <div><label class="fl">Новая дата</label><input class="fi" id="rD" type="date" oninput="checkRC()"></div>
+      <div><label class="fl">Время</label><input class="fi" id="rT" type="time" oninput="checkRC()"></div>
+    </div>
+    <div class="fr"><label class="fl">Процедура</label><textarea class="fi" id="rNt"></textarea></div>
+    <div class="fr"><label class="fl">Стоимость</label><div class="pw"><input class="fi" id="rPr" type="number" style="padding-right:44px"><span class="cur">сом</span></div></div>
+    <button class="abtn" onclick="confirmRepeat()">✦ Записать снова</button>
+  </div>
+</div>
+
+<!-- INSTRUCTIONS MODAL -->
+<div class="mover" id="instrModal">
+  <div class="modal">
+    <button class="mclose" onclick="document.getElementById('instrModal').classList.remove('open')">✕</button>
+    <div class="mtitle">📖 Подключение Google Таблицы</div>
+    <div style="font-size:13px;color:var(--mid);line-height:1.8">
+      <p style="margin-bottom:12px;color:var(--lmid)">Один раз настроить — данные будут храниться в Google навсегда.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:var(--cream);border-radius:12px;padding:12px">
+          <strong style="color:var(--rose)">Шаг 1.</strong> Откройте <a href="https://sheets.new" target="_blank" style="color:var(--rose)">sheets.new</a> — создастся новая таблица
+        </div>
+        <div style="background:var(--cream);border-radius:12px;padding:12px">
+          <strong style="color:var(--rose)">Шаг 2.</strong> В меню сверху: <strong>Расширения → Apps Script</strong>
+        </div>
+        <div style="background:var(--cream);border-radius:12px;padding:12px">
+          <strong style="color:var(--rose)">Шаг 3.</strong> Удалите весь код и вставьте этот:
+          <div style="background:white;border-radius:8px;padding:10px;margin-top:8px;font-family:monospace;font-size:11px;color:var(--dark);word-break:break-all;border:1px solid var(--blush)" id="scriptCode"></div>
+          <button onclick="copyScript()" style="margin-top:8px;width:100%;padding:8px;background:var(--rose);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">📋 Скопировать код</button>
+        </div>
+        <div style="background:var(--cream);border-radius:12px;padding:12px">
+          <strong style="color:var(--rose)">Шаг 4.</strong> Нажмите <strong>Развернуть → Новое развертывание</strong><br>
+          Тип: <strong>Веб-приложение</strong><br>
+          Доступ: <strong>Все</strong><br>
+          Нажмите <strong>Развернуть</strong>
+        </div>
+        <div style="background:var(--cream);border-radius:12px;padding:12px">
+          <strong style="color:var(--rose)">Шаг 5.</strong> Скопируйте URL и вставьте в поле настроек приложения
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_CODE = `function doPost(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName("Пациенты") || ss.insertSheet("Пациенты");
+  if(sh.getLastRow()===0) sh.appendRow(["ID","Имя","Телефон","Дата","Время","Процедура","Стоимость","Оповещён","Создан"]);
+  var d = JSON.parse(e.postData.contents);
+  if(d.action==="sync") {
+    sh.clearContents();
+    sh.appendRow(["ID","Имя","Телефон","Дата","Время","Процедура","Стоимость","Оповещён","Создан"]);
+    d.patients.forEach(function(p){ sh.appendRow([p.id,p.name,p.phone,p.date,p.time,p.notes||"",p.price||0,p.notified?"Да":"Нет",p.createdAt]); });
+  }
+  return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
+}
+function doGet(e) {
+  return ContentService.createTextOutput(JSON.stringify({ok:true,msg:"Скрипт работает!"})).setMimeType(ContentService.MimeType.JSON);
+}`;
+
+document.getElementById('scriptCode').textContent = SCRIPT_CODE;
+
+function copyScript(){
+  navigator.clipboard.writeText(SCRIPT_CODE).then(()=>showT('📋 Код скопирован!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=SCRIPT_CODE;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showT('📋 Код скопирован!');
+  });
+}
+
+// ── DATA ──
+const DAYS=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+const MONTHS=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const SDAYS=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+
+let pts = JSON.parse(localStorage.getItem('dp4')||'[]');
+let rOn = localStorage.getItem('dr')==='1';
+let sheetUrl = localStorage.getItem('sheetUrl')||'';
+let rTimers = {};
+let curPeriod = 'week';
+let editId = null;
+let repeatId = null;
+
+const s2=n=>String(n).padStart(2,'0');
+function today(){const d=new Date();return`${d.getFullYear()}-${s2(d.getMonth()+1)}-${s2(d.getDate())}`}
+function fmtD(ds){if(!ds)return'';const[,m,d]=ds.split('-');return`${parseInt(d)} ${MONTHS[parseInt(m)-1]}`}
+function save(){localStorage.setItem('dp4',JSON.stringify(pts))}
+
+function init(){
+  document.getElementById('iD').value=today();
+  document.getElementById('rtog').checked=rOn;
+  document.getElementById('rstatus').textContent=rOn?'Уведомления включены ✓':'Уведомление за 1 час до приёма';
+  document.getElementById('sheetUrl').value=sheetUrl;
+  if(rOn) pts.forEach(schedR);
+  updateSheetStatus();
+  renderStats(); renderAll();
+}
+
+// ── TABS ──
+function setTab(i){
+  document.querySelectorAll('.nb').forEach((b,j)=>b.classList.toggle('active',i===j));
+  document.querySelectorAll('.page').forEach((p,j)=>p.classList.toggle('active',i===j));
+  if(i===3) renderSP();
+}
+
+// ── CONFLICT ──
+function hasConflict(date,time,excludeId=null){
+  return pts.some(p=>p.id!==excludeId&&p.date===date&&p.time===time);
+}
+function checkC(){
+  const d=document.getElementById('iD').value,t=document.getElementById('iT').value;
+  document.getElementById('cwarn').classList.toggle('show',!!(d&&t&&hasConflict(d,t)));
+}
+function checkEditC(){
+  const d=document.getElementById('eD').value,t=document.getElementById('eT').value;
+  document.getElementById('editWarn').classList.toggle('show',!!(d&&t&&hasConflict(d,t,editId)));
+}
+function checkRC(){
+  const d=document.getElementById('rD').value,t=document.getElementById('rT').value;
+  document.getElementById('rwarn').classList.toggle('show',!!(d&&t&&hasConflict(d,t)));
+}
+
+// ── ADD ──
+function addP(){
+  const n=document.getElementById('iN').value.trim();
+  const p=document.getElementById('iP').value.trim();
+  const d=document.getElementById('iD').value;
+  const t=document.getElementById('iT').value;
+  const nt=document.getElementById('iNt').value.trim();
+  const pr=parseFloat(document.getElementById('iPr').value)||0;
+  if(!n||!p||!d||!t){showT('⚠️ Заполните имя, телефон, дату и время');return}
+  if(hasConflict(d,t)){showT('⚠️ На это время уже есть запись!');return}
+  const pt={id:Date.now(),name:n,phone:p,date:d,time:t,notes:nt,price:pr,notified:false,createdAt:new Date().toISOString()};
+  pts.push(pt); save();
+  if(rOn) schedR(pt);
+  syncNow(true);
+  renderStats(); renderAll();
+  showT('✅ Пациент добавлен');
+  ['iN','iP','iT','iNt','iPr'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('iD').value=today();
+  document.getElementById('cwarn').classList.remove('show');
+  setTab(0);
+}
+
+// ── DELETE ──
+function delP(id){
+  if(confirm('Удалить запись?')){
+    pts=pts.filter(p=>p.id!==id);save();syncNow(true);renderStats();renderAll();showT('🗑 Запись удалена');
+  }
+}
+
+// ── EDIT ──
+function openEdit(id){
+  const p=pts.find(x=>x.id===id);if(!p)return;
+  editId=id;
+  document.getElementById('eN').value=p.name;
+  document.getElementById('ePh').value=p.phone;
+  document.getElementById('eD').value=p.date;
+  document.getElementById('eT').value=p.time;
+  document.getElementById('eNt').value=p.notes||'';
+  document.getElementById('ePr').value=p.price||'';
+  document.getElementById('editWarn').classList.remove('show');
+  document.getElementById('editModal').classList.add('open');
+}
+function closeEdit(){document.getElementById('editModal').classList.remove('open')}
+function saveEdit(){
+  const d=document.getElementById('eD').value,t=document.getElementById('eT').value;
+  if(hasConflict(d,t,editId)){showT('⚠️ На это время уже есть запись!');return}
+  const p=pts.find(x=>x.id===editId);if(!p)return;
+  p.name=document.getElementById('eN').value.trim();
+  p.phone=document.getElementById('ePh').value.trim();
+  p.date=d; p.time=t;
+  p.notes=document.getElementById('eNt').value.trim();
+  p.price=parseFloat(document.getElementById('ePr').value)||0;
+  save(); syncNow(true); closeEdit(); renderStats(); renderAll();
+  showT('✅ Изменения сохранены');
+}
+
+// ── NOTIFY WhatsApp only ──
+function sendWA(id){
+  const p=pts.find(x=>x.id===id);if(!p)return;
+  const msg=encodeURIComponent(`Здравствуйте, ${p.name}! 🦷\n\nНапоминаем о вашем визите к стоматологу сегодня в ${p.time}.\n\nБудем рады вас видеть! 😊`);
+  window.open(`https://wa.me/${p.phone.replace(/\D/g,'')}?text=${msg}`,'_blank');
+  const pt=pts.find(x=>x.id===id);
+  if(pt){pt.notified=true;save();syncNow(true);renderStats();renderAll();showT('📨 Напоминание отправлено')}
+}
+
+// ── REPEAT ──
+function openRepeat(id){
+  const p=pts.find(x=>x.id===id);if(!p)return;
+  repeatId=id;
+  document.getElementById('rN').value=p.name;
+  document.getElementById('rPh').value=p.phone;
+  document.getElementById('rNt').value=p.notes||'';
+  document.getElementById('rPr').value=p.price||'';
+  document.getElementById('rD').value='';
+  document.getElementById('rT').value='';
+  document.getElementById('rwarn').classList.remove('show');
+  document.getElementById('repeatModal').classList.add('open');
+}
+function closeRepeat(){document.getElementById('repeatModal').classList.remove('open')}
+function confirmRepeat(){
+  const d=document.getElementById('rD').value,t=document.getElementById('rT').value;
+  if(!d||!t){showT('⚠️ Укажите дату и время');return}
+  if(hasConflict(d,t)){showT('⚠️ На это время уже есть запись!');return}
+  const pt={id:Date.now(),name:document.getElementById('rN').value,phone:document.getElementById('rPh').value,date:d,time:t,notes:document.getElementById('rNt').value,price:parseFloat(document.getElementById('rPr').value)||0,notified:false,createdAt:new Date().toISOString()};
+  pts.push(pt);save();if(rOn)schedR(pt);
+  syncNow(true);closeRepeat();renderStats();renderAll();showT('🔁 Записан на повторный визит');setTab(0);
+}
+
+// ── REMINDER ──
+function toggleR(){
+  rOn=document.getElementById('rtog').checked;
+  localStorage.setItem('dr',rOn?'1':'0');
+  document.getElementById('rstatus').textContent=rOn?'Уведомления включены ✓':'Уведомление за 1 час до приёма';
+  if(rOn){
+    Notification.requestPermission().then(perm=>{
+      if(perm==='granted'){pts.forEach(schedR);showT('⏰ Автонапоминания включены')}
+      else{document.getElementById('rtog').checked=false;rOn=false;showT('⚠️ Разрешите уведомления в браузере')}
+    });
+  } else {Object.values(rTimers).forEach(t=>clearTimeout(t));rTimers={};showT('🔕 Выключены')}
+}
+function schedR(p){
+  if(rTimers[p.id]) clearTimeout(rTimers[p.id]);
+  const ms=new Date(`${p.date}T${p.time}`).getTime()-Date.now()-3600000;
+  if(ms>0) rTimers[p.id]=setTimeout(()=>{
+    if(Notification.permission==='granted')
+      new Notification('🦷 Напоминание',{body:`${p.name} — через 1 час (${p.time})`});
+  },ms);
+}
+
+// ── GOOGLE SHEETS SYNC ──
+function saveSheetUrl(){
+  sheetUrl=document.getElementById('sheetUrl').value.trim();
+  localStorage.setItem('sheetUrl',sheetUrl);
+  updateSheetStatus();
+  if(sheetUrl) syncNow();
+  else showT('URL удалён');
+}
+
+function updateSheetStatus(){
+  const el=document.getElementById('sheetStatus');
+  if(sheetUrl){
+    el.innerHTML=`<div class="connected-badge">✅ Google Таблица подключена<br><span style="font-size:11px;font-weight:400;margin-top:2px;opacity:.7;word-break:break-all">${sheetUrl.substring(0,50)}...</span></div>`;
+  } else {
+    el.innerHTML=`<p style="font-size:13px;color:var(--lmid);line-height:1.6">Подключите Google Таблицу чтобы данные сохранялись в облаке и никогда не удалялись.</p>`;
+  }
+}
+
+async function syncNow(silent=false){
+  if(!sheetUrl){if(!silent)showT('⚠️ Сначала подключите Google Таблицу');return}
+  const btn=document.getElementById('syncBtn');
+  btn.classList.add('syncing');
+  document.getElementById('syncTxt').textContent='Синхронизация...';
+  try{
+    await fetch(sheetUrl,{method:'POST',body:JSON.stringify({action:'sync',patients:pts}),headers:{'Content-Type':'text/plain'}});
+    if(!silent) showT('✅ Данные сохранены в Google Таблице');
+  } catch(e){
+    if(!silent) showT('⚠️ Ошибка синхронизации — проверьте URL');
+  } finally {
+    btn.classList.remove('syncing');
+    document.getElementById('syncTxt').textContent='Синхронизировать';
+  }
+}
+
+function showInstructions(){document.getElementById('instrModal').classList.add('open')}
+
+// ── BACKUP ──
+function exportData(){
+  const blob=new Blob([JSON.stringify({version:1,patients:pts,exportDate:new Date().toISOString()},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`pациенты_backup_${today()}.json`;a.click();
+  showT('✅ Backup скачан');
+}
+function importData(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(data.patients&&Array.isArray(data.patients)){
+        if(confirm(`Восстановить ${data.patients.length} записей? Текущие данные будут заменены.`)){
+          pts=data.patients;save();renderStats();renderAll();showT('✅ Данные восстановлены');
+        }
+      }else showT('⚠️ Неверный формат файла');
+    }catch{showT('⚠️ Ошибка чтения файла')}
+  };
+  r.readAsText(file);
+  e.target.value='';
+}
+
+// ── RENDER ──
+function renderStats(){
+  const t=today();
+  const tp=pts.filter(p=>p.date===t);
+  const earned=tp.filter(p=>p.procStatus==='done').reduce((s,p)=>s+(p.price||0),0);
+  const pending=tp.filter(p=>p.procStatus!=='done').reduce((s,p)=>s+(p.price||0),0);
+  document.getElementById('statsbar').innerHTML=`
+    <div class="sb"><div class="sbn">${tp.length}</div><div class="sbl">Сегодня</div></div>
+    <div class="sb"><div class="sbn">${tp.filter(p=>p.notified).length}</div><div class="sbl">Оповещены</div></div>
+    <div class="sb g"><div class="sbn">${earned>=1000?Math.round(earned/1000)+'к':earned||0}</div><div class="sbl">Заработано</div></div>
+    <div class="sb" style="position:relative;overflow:hidden"><div class="sbn" style="color:var(--lmid)">${pending>=1000?Math.round(pending/1000)+'к':pending||0}</div><div class="sbl">Предварит.</div><div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--lmid),var(--blush))"></div></div>`;
+}
+
+function renderAll(){
+  const t=today();
+  const sq=(document.getElementById('srchT').value||'').toLowerCase();
+  const sa=(document.getElementById('srchA').value||'').toLowerCase();
+
+  let tl=pts.filter(p=>p.date===t&&(!sq||p.name.toLowerCase().includes(sq)||p.phone.includes(sq))).sort((a,b)=>a.time.localeCompare(b.time));
+  document.getElementById('listT').innerHTML=tl.length?tl.map(p=>card(p,true)).join(''):`<div class="empty"><div class="eico">🌸</div><div class="etxt">На сегодня записей нет</div></div>`;
+
+  let al=[...pts].filter(p=>!sa||p.name.toLowerCase().includes(sa)||p.phone.includes(sa)).sort((a,b)=>b.date.localeCompare(a.date)||a.time.localeCompare(b.time));
+  if(!al.length){document.getElementById('listA').innerHTML=`<div class="empty"><div class="eico">👤</div><div class="etxt">Пациентов пока нет</div></div>`;return}
+  let html='',ld='';
+  al.forEach(p=>{
+    if(p.date!==ld){html+=`<div class="ddiv">${p.date===t?'📅 Сегодня':fmtD(p.date)}</div>`;ld=p.date}
+    html+=card(p,false);
+  });
+  document.getElementById('listA').innerHTML=html;
+}
+
+const WA_SVG=`<svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`;
+
+function card(p,isT){
+  const now=new Date(),dt=new Date(`${p.date}T${p.time}`);
+  const past=dt<now&&p.date!==today();
+  const st=p.visitStatus||'waiting';
+  const pr=p.procStatus||'';
+  return`<div class="pc ${p.notified?'notified':''} ${past?'past':''}">
+    <div class="ptop"><div class="pname">${p.name}</div><div class="ptime">🕐 ${p.time}</div></div>
+    <div class="pmeta"><span>📞 ${p.phone}</span>${!isT?`<span class="m">📅 ${fmtD(p.date)}</span>`:''}</div>
+    ${p.price>0?`<div class="pprice">💰 ${p.price.toLocaleString()} сом</div>`:''}
+    ${p.notes?`<div class="pnote">💬 ${p.notes}</div>`:''}
+    ${p.notified?`<div class="nbadge">✓ Оповещён через WhatsApp</div>`:''}
+    <div class="status-row">
+      <button class="sbs w ${st==='waiting'?'on':''}" onclick="setVisit(${p.id},'waiting')">⏳ Ожидается</button>
+      <button class="sbs c ${st==='came'?'on':''}" onclick="setVisit(${p.id},'came')">✅ Пришёл</button>
+      <button class="sbs n ${st==='notcame'?'on':''}" onclick="setVisit(${p.id},'notcame')">❌ Не пришёл</button>
+    </div>
+    ${st==='came'?`<div class="proc-row">
+      <button class="pbs ip ${pr==='inprog'?'on':''}" onclick="setProc(${p.id},'inprog')">🔧 В процессе</button>
+      <button class="pbs dn ${pr==='done'?'on':''}" onclick="setProc(${p.id},'done')">🎉 Завершено</button>
+    </div>`:''}
+    ${st==='notcame'?`<button class="bwa" style="margin-top:8px;width:100%" onclick="sendNoShow(${p.id})">${WA_SVG} Написать — не пришли</button>`:''}
+    <div class="pacts">
+      <button class="bwa" onclick="sendWA(${p.id})">${WA_SVG} WhatsApp</button>
+      <button class="bedit" onclick="openEdit(${p.id})">✏️</button>
+      <button class="brep" onclick="openRepeat(${p.id})">🔁</button>
+      <button class="bdel" onclick="delP(${p.id})">🗑</button>
+    </div>
+  </div>`;
+}
+
+function setVisit(id,status){
+  const p=pts.find(x=>x.id===id);if(!p)return;
+  p.visitStatus=status;
+  if(status!=='came') p.procStatus='';
+  save();syncNow(true);renderAll();
+  const labels={waiting:'⏳ Ожидается',came:'✅ Пришёл',notcame:'❌ Не пришёл'};
+  showT(labels[status]);
+}
+function setProc(id,status){
+  const p=pts.find(x=>x.id===id);if(!p)return;
+  p.procStatus=status;save();syncNow(true);renderAll();
+  showT(status==='done'?'🎉 Процедура завершена!':'🔧 В процессе');
+}
+function sendNoShow(id){
+  const p=pts.find(x=>x.id===id);if(!p)return;
+  const msg=encodeURIComponent(`Здравствуйте, ${p.name}! 🦷\n\nВы не пришли на запись сегодня в ${p.time}.\n\nХотите перезаписаться? Напишите нам и выберем удобное время 😊`);
+  window.open(`https://wa.me/${p.phone.replace(/\D/g,'')}?text=${msg}`,'_blank');
+}
+
+// ── STATS PAGE ──
+function setPeriod(p,el){curPeriod=p;document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderSP()}
+function renderSP(){
+  const now=new Date();
+  let days=[],filtered=pts;
+  if(curPeriod==='week'){for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d)}filtered=pts.filter(p=>new Date(p.date)>=days[0]&&new Date(p.date)<=now)}
+  else if(curPeriod==='month'){for(let i=29;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d)}filtered=pts.filter(p=>new Date(p.date)>=days[0]&&new Date(p.date)<=now)}
+
+  if(days.length){
+    const max=Math.max(1,...days.map(d=>{const ds=`${d.getFullYear()}-${s2(d.getMonth()+1)}-${s2(d.getDate())}`;return filtered.filter(p=>p.date===ds).length}));
+    document.getElementById('chart').innerHTML=days.map(d=>{
+      const ds=`${d.getFullYear()}-${s2(d.getMonth()+1)}-${s2(d.getDate())}`;
+      const cnt=filtered.filter(p=>p.date===ds).length;
+      const pct=Math.max(8,Math.round(cnt/max*100));
+      return`<div class="crow"><span class="clbl">${curPeriod==='week'?SDAYS[d.getDay()]:d.getDate()}</span><div class="cbar"><div class="cfill" style="width:${pct}%"><span class="cval">${cnt||''}</span></div></div></div>`;
+    }).join('');
+  } else {
+    const byD={};pts.forEach(p=>{byD[p.date]=(byD[p.date]||0)+1});
+    const sorted=Object.entries(byD).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,8).reverse();
+    const max=Math.max(1,...sorted.map(x=>x[1]));
+    document.getElementById('chart').innerHTML=sorted.length?sorted.map(([ds,cnt])=>{
+      const pct=Math.max(8,Math.round(cnt/max*100));
+      return`<div class="crow"><span class="clbl" style="width:44px;font-size:10px">${fmtD(ds)}</span><div class="cbar"><div class="cfill" style="width:${pct}%"><span class="cval">${cnt}</span></div></div></div>`
+    }).join(''):`<div style="text-align:center;color:var(--lmid);padding:20px;font-size:13px">Пока нет данных</div>`;
+  }
+
+  const totalEarned=filtered.filter(p=>p.procStatus==='done').reduce((s,p)=>s+(p.price||0),0);
+  const totalPending=filtered.filter(p=>p.procStatus!=='done').reduce((s,p)=>s+(p.price||0),0);
+  const todayEarned=pts.filter(p=>p.date===today()&&p.procStatus==='done').reduce((s,p)=>s+(p.price||0),0);
+  const wp=filtered.filter(p=>p.price>0&&p.procStatus==='done');
+  document.getElementById('incomeS').innerHTML=`
+    <div class="irow"><span class="ilbl">✅ Заработано за период</span><span class="ival big">${totalEarned.toLocaleString()} сом</span></div>
+    <div class="irow"><span class="ilbl">⏳ Предварительно</span><span class="ival" style="color:var(--lmid)">${totalPending.toLocaleString()} сом</span></div>
+    <div class="irow"><span class="ilbl">Сегодня заработано</span><span class="ival">${todayEarned.toLocaleString()} сом</span></div>
+    <div class="irow"><span class="ilbl">Средний чек</span><span class="ival">${wp.length?Math.round(totalEarned/wp.length).toLocaleString():0} сом</span></div>`;
+
+  const phC={};pts.forEach(p=>{phC[p.phone]=(phC[p.phone]||0)+1});
+  const uniq=Object.keys(phC).length;
+  const reps=Object.values(phC).filter(c=>c>1).length;
+  document.getElementById('repeatS').innerHTML=`
+    <div class="irow"><span class="ilbl">Уникальных пациентов</span><span class="ival">${uniq}</span></div>
+    <div class="irow"><span class="ilbl">С повторными визитами</span><span class="ival">${reps}</span></div>
+    <div class="irow"><span class="ilbl">% лояльных</span><span class="ival big">${uniq?Math.round(reps/uniq*100):0}%</span></div>`;
+}
+
+function showT(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600)}
+
+init();
+</script>
+</body>
+</html>

@@ -233,6 +233,33 @@ input:checked+.day-tsl:before{transform:translateX(17px)}
 .google-btn-ico{width:20px;height:20px}
 .spec-chip{flex-shrink:0;padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;border:1.5px solid var(--border);background:var(--white);color:var(--mid)}
 .spec-chip.on{background:var(--teal);color:white;border-color:transparent;box-shadow:0 2px 8px rgba(26,107,90,.2)}
+
+/* ═══ SLOT PICKER ═══ */
+.slot-picker-wrap{margin-bottom:13px}
+.slot-picker-label{display:block;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.slot-date-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;-ms-overflow-style:none}
+.slot-date-row::-webkit-scrollbar{display:none}
+.slot-day-btn{flex-shrink:0;width:52px;padding:8px 4px;border-radius:12px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;text-align:center;transition:all .2s;font-family:'Nunito',sans-serif}
+.slot-day-btn:hover{border-color:var(--teal-mid)}
+.slot-day-btn.on{background:var(--teal);border-color:var(--teal);color:white}
+.slot-day-btn.off{opacity:.4;cursor:not-allowed;background:var(--bg)}
+.slot-day-name{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.slot-day-num{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;line-height:1;margin-bottom:2px}
+.slot-day-mon{font-size:9px;opacity:.75}
+.slot-day-btn.on .slot-day-name,.slot-day-btn.on .slot-day-num,.slot-day-btn.on .slot-day-mon{color:white}
+.slot-day-btn:not(.on) .slot-day-name{color:var(--muted)}
+.slot-day-btn:not(.on) .slot-day-num{color:var(--text)}
+.slot-day-btn:not(.on) .slot-day-mon{color:var(--muted)}
+
+.slots-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:10px}
+.slot-btn{padding:10px 4px;border-radius:10px;border:1.5px solid var(--border);background:var(--white);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;text-align:center;transition:all .18s}
+.slot-btn:hover:not(.taken):not(.break-slot){border-color:var(--teal);background:var(--teal-light);color:var(--teal)}
+.slot-btn.on{background:var(--teal);border-color:var(--teal);color:white;box-shadow:0 2px 10px rgba(26,107,90,.3)}
+.slot-btn.taken{background:var(--bg);border-color:transparent;color:#ccc;cursor:not-allowed;text-decoration:line-through;font-size:11px}
+.slot-btn.break-slot{background:var(--gold-light);border-color:rgba(212,168,75,.3);color:#bfa050;cursor:not-allowed;font-size:11px}
+.slots-empty{text-align:center;padding:18px;color:var(--muted);font-size:13px;background:var(--bg);border-radius:12px}
+.slots-no-schedule{background:var(--gold-light);border:1px solid rgba(212,168,75,.3);border-radius:12px;padding:12px 14px;font-size:13px;color:#8a6820;display:flex;align-items:center;gap:8px}
+.selected-slot-badge{display:inline-flex;align-items:center;gap:6px;background:var(--teal-light);color:var(--teal);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:700;margin-top:8px}
 </style>
 </head>
 <body>
@@ -318,13 +345,17 @@ input:checked+.day-tsl:before{transform:translateX(17px)}
   </div></div>
   <div class="scroll-body" style="padding:14px 14px calc(var(--nav) + var(--safe) + 20px)">
     <div class="card">
-      <div class="warn-box" id="add-warn">⚠️ На это время уже есть запись!</div>
       <div class="fr"><label class="fl">Имя пациента</label><input class="fi" id="iN" placeholder="Умар Элдияров"></div>
       <div class="fr"><label class="fl">Телефон</label><input class="fi" id="iP" placeholder="+996 700 000 000" type="tel" value="+996 " oninput="enforcePrefix('iP')"></div>
-      <div class="fr2">
-        <div><label class="fl">Дата</label><input class="fi" id="iD" type="date" oninput="checkConflict('add')"></div>
-        <div><label class="fl">Время</label><input class="fi" id="iT" type="time" oninput="checkConflict('add')"></div>
+
+      <!-- SMART SLOT PICKER -->
+      <div class="slot-picker-wrap">
+        <label class="slot-picker-label">📅 Выберите дату и время</label>
+        <div class="slot-date-row" id="add-date-row"></div>
+        <div id="add-slots-area"></div>
+        <div id="add-selected-slot"></div>
       </div>
+
       <button id="add-details-btn" onclick="toggleAddDetails()" style="background:var(--bg);border:1.5px dashed var(--border);border-radius:11px;padding:10px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;margin-bottom:12px;width:100%;display:flex;align-items:center;justify-content:center;gap:6px">
         <span id="add-details-ico">＋</span> Подробнее — зуб, стоимость, процедура
       </button>
@@ -542,6 +573,7 @@ const DAYS_RU = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
 const DAYS_FULL = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
 const MONTHS_RU = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const MONTHS_NOM = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const MONTHS_SHORT = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
 const s2 = n => String(n).padStart(2,'0');
 const today = () => { const d=new Date(); return `${d.getFullYear()}-${s2(d.getMonth()+1)}-${s2(d.getDate())}`; };
 const fmtD = ds => { if(!ds)return''; const[,m,d]=ds.split('-'); return `${parseInt(d)} ${MONTHS_RU[parseInt(m)-1]}`; };
@@ -558,6 +590,10 @@ let editId = null;
 let allTab = 0;
 let allFilter = '';
 let dashPeriod = 0;
+
+// Selected slot state for add form
+let addSelectedDate = null;
+let addSelectedTime = null;
 
 // ════ AUTH ════
 onAuthStateChanged(auth, async user => {
@@ -594,11 +630,11 @@ function subscribePatients(){
   const q = query(collection(db,'patients'), where('docId','==',currentUser.uid));
   patientsUnsub = onSnapshot(q, snap => {
     myPatients = snap.docs.map(d=>({firestoreId:d.id,...d.data()}));
-    // Refresh active screen
     const active = document.querySelector('.screen.show');
     if(active?.id==='s-today') renderToday();
     else if(active?.id==='s-all') renderAll();
     else if(active?.id==='s-dash') renderDashboard();
+    else if(active?.id==='s-add') refreshAddSlots();
   });
 }
 
@@ -663,7 +699,6 @@ function renderToday(){
     <div class="dsb"><div class="dsb-n">${fmtS(earned)}</div><div class="dsb-l">Заработано</div></div>
     <div class="dsb"><div class="dsb-n" style="color:${totalDebt>0?'#ffcdd2':'white'}">${fmtS(totalDebt)}</div><div class="dsb-l">Долги</div></div>`;
 
-  // Next patient
   const upcoming = todayPts.filter(p=>{
     const [ph,pm]=p.time.split(':').map(Number);
     return (ph*60+pm)>=nowMin && p.procStatus!=='done' && p.visitStatus!=='notcame';
@@ -698,7 +733,6 @@ function renderToday(){
       </div>`;
   }
 
-  // Timeline
   if(!todayPts.length){ document.getElementById('today-timeline').innerHTML=''; return; }
   let html=`<div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--mid);margin-bottom:10px">📋 Расписание на сегодня</div>`;
   todayPts.forEach((p,idx)=>{
@@ -847,15 +881,163 @@ function renderAllFilters(filters){
   el.innerHTML=filters.map(f=>`<div class="filter-chip ${allFilter===f?'on':''}" onclick="setAllFilter('${f}',this)">${f}</div>`).join('');
 }
 
+// ════ SLOT PICKER ════
+function getScheduleForDate(dateStr) {
+  if(!currentDocData?.schedule) return null;
+  const d = new Date(dateStr + 'T00:00:00');
+  const dow = d.getDay(); // 0=Sun ... 6=Sat
+  const sched = currentDocData.schedule[dow];
+  if(!sched || !sched.on) return null;
+  return sched;
+}
+
+function generateSlots(dateStr) {
+  const sched = getScheduleForDate(dateStr);
+  if(!sched) return null;
+
+  const dur = currentDocData?.slotDuration || 30;
+  const slots = [];
+
+  const timeToMin = t => {
+    if(!t) return null;
+    const [h,m] = t.split(':').map(Number);
+    return h*60+m;
+  };
+
+  const fromMin = timeToMin(sched.from);
+  const toMin = timeToMin(sched.to);
+  const breakFrom = timeToMin(sched.breakFrom);
+  const breakTo = timeToMin(sched.breakTo);
+
+  if(fromMin == null || toMin == null) return null;
+
+  for(let m = fromMin; m + dur <= toMin; m += dur) {
+    const h = Math.floor(m/60), min = m%60;
+    const timeStr = `${s2(h)}:${s2(min)}`;
+    const isBreak = breakFrom != null && breakTo != null && m >= breakFrom && m < breakTo;
+    const isTaken = myPatients.some(p => !p.archived && p.date === dateStr && p.time === timeStr);
+    slots.push({ time: timeStr, isBreak, isTaken });
+  }
+  return slots;
+}
+
+function renderDateRow(containerId, selectedDate, onSelectDate) {
+  const container = document.getElementById(containerId);
+  if(!container) return;
+
+  const days = [];
+  const now = new Date();
+  for(let i = 0; i < 14; i++) {
+    const d = new Date(now);
+    d.setDate(d.getDate() + i);
+    const ds = `${d.getFullYear()}-${s2(d.getMonth()+1)}-${s2(d.getDate())}`;
+    const sched = getScheduleForDate(ds);
+    days.push({ ds, d, isWorkDay: !!sched });
+  }
+
+  container.innerHTML = days.map(({ds, d, isWorkDay}) => {
+    const isOn = ds === selectedDate;
+    return `<div class="slot-day-btn ${isOn?'on':''} ${!isWorkDay?'off':''}" 
+      onclick="${isWorkDay ? `selectAddDate('${ds}')` : ''}">
+      <div class="slot-day-name">${DAYS_RU[d.getDay()]}</div>
+      <div class="slot-day-num">${d.getDate()}</div>
+      <div class="slot-day-mon">${MONTHS_SHORT[d.getMonth()]}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderSlotsArea(slotsAreaId, selectedBadgeId, dateStr, selectedTime, onSelectTime) {
+  const area = document.getElementById(slotsAreaId);
+  const badge = document.getElementById(selectedBadgeId);
+  if(!area) return;
+
+  if(!dateStr) {
+    area.innerHTML = '';
+    if(badge) badge.innerHTML = '';
+    return;
+  }
+
+  if(!currentDocData?.schedule) {
+    area.innerHTML = `<div class="slots-no-schedule">⚙️ Сначала настройте график работы в Профиле</div>`;
+    if(badge) badge.innerHTML = '';
+    return;
+  }
+
+  const sched = getScheduleForDate(dateStr);
+  if(!sched) {
+    area.innerHTML = `<div class="slots-empty">😴 В этот день вы не работаете</div>`;
+    if(badge) badge.innerHTML = '';
+    return;
+  }
+
+  const slots = generateSlots(dateStr);
+  if(!slots || !slots.length) {
+    area.innerHTML = `<div class="slots-empty">Нет доступных слотов</div>`;
+    if(badge) badge.innerHTML = '';
+    return;
+  }
+
+  const freeCount = slots.filter(s => !s.isBreak && !s.isTaken).length;
+
+  area.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">
+        Слоты · ${currentDocData.slotDuration||30} мин
+      </span>
+      <span style="font-size:11px;color:var(--teal);font-weight:700">${freeCount} свободных</span>
+    </div>
+    <div class="slots-grid">
+      ${slots.map(sl => {
+        let cls = '';
+        let label = sl.time;
+        if(sl.isBreak) { cls = 'break-slot'; label = `${sl.time}<br><span style="font-size:9px">обед</span>`; }
+        else if(sl.isTaken) { cls = 'taken'; label = `${sl.time}<br><span style="font-size:9px">занято</span>`; }
+        else if(sl.time === selectedTime) cls = 'on';
+        const clickable = !sl.isBreak && !sl.isTaken;
+        return `<div class="slot-btn ${cls}" ${clickable ? `onclick="selectAddTime('${sl.time}')"` : ''}>${label}</div>`;
+      }).join('')}
+    </div>`;
+
+  if(badge) {
+    if(selectedTime && dateStr) {
+      badge.innerHTML = `<div class="selected-slot-badge">✅ ${fmtD(dateStr)} · ${selectedTime}</div>`;
+    } else {
+      badge.innerHTML = '';
+    }
+  }
+}
+
+window.selectAddDate = function(ds) {
+  addSelectedDate = ds;
+  addSelectedTime = null;
+  renderDateRow('add-date-row', addSelectedDate, selectAddDate);
+  renderSlotsArea('add-slots-area', 'add-selected-slot', addSelectedDate, addSelectedTime, selectAddTime);
+};
+
+window.selectAddTime = function(time) {
+  addSelectedTime = time;
+  renderSlotsArea('add-slots-area', 'add-selected-slot', addSelectedDate, addSelectedTime, selectAddTime);
+};
+
+function refreshAddSlots() {
+  renderDateRow('add-date-row', addSelectedDate, selectAddDate);
+  if(addSelectedDate) {
+    renderSlotsArea('add-slots-area', 'add-selected-slot', addSelectedDate, addSelectedTime, selectAddTime);
+  }
+}
+
 // ════ ADD PATIENT ════
 function resetAddForm(){
-  ['iN','iT','iNt','iPr','iTooth'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['iN','iNt','iPr','iTooth'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const iP=document.getElementById('iP');if(iP)iP.value='+996 ';
-  const iD=document.getElementById('iD');if(iD)iD.value=today();
   const det=document.getElementById('add-details');if(det)det.style.display='none';
   const ico=document.getElementById('add-details-ico');if(ico)ico.textContent='＋';
   const btn=document.getElementById('add-details-btn');if(btn){btn.style.color='var(--muted)';btn.style.borderColor='var(--border)';}
-  const warn=document.getElementById('add-warn');if(warn)warn.classList.remove('show');
+  // Reset slot selection
+  addSelectedDate = today();
+  addSelectedTime = null;
+  renderDateRow('add-date-row', addSelectedDate, selectAddDate);
+  renderSlotsArea('add-slots-area', 'add-selected-slot', addSelectedDate, addSelectedTime, selectAddTime);
 }
 
 window.toggleAddDetails = function(){
@@ -871,26 +1053,25 @@ window.toggleAddDetails = function(){
 
 window.checkConflict = function(ctx){
   let d,t,excl=null;
-  if(ctx==='add'){d=document.getElementById('iD').value;t=document.getElementById('iT').value;}
-  else if(ctx==='edit'){d=document.getElementById('eD').value;t=document.getElementById('eT').value;excl=editId;}
+  if(ctx==='edit'){d=document.getElementById('eD').value;t=document.getElementById('eT').value;excl=editId;}
   else if(ctx==='rep'){d=document.getElementById('rD').value;t=document.getElementById('rT').value;}
   const conflict=myPatients.some(p=>p.firestoreId!==excl&&!p.archived&&p.date===d&&p.time===t);
-  const wid=ctx==='add'?'add-warn':ctx==='edit'?'edit-warn':'rep-warn';
+  const wid=ctx==='edit'?'edit-warn':'rep-warn';
   document.getElementById(wid)?.classList.toggle('show',!!(d&&t&&conflict));
 };
 
 window.addPatient = async function(){
   const n=document.getElementById('iN').value.trim();
   const ph=document.getElementById('iP').value.trim();
-  const d=document.getElementById('iD').value;
-  const t=document.getElementById('iT').value;
-  if(!n||!ph||!d||!t){showT('⚠️ Заполните имя, телефон, дату и время');return;}
-  if(myPatients.some(p=>!p.archived&&p.date===d&&p.time===t)){showT('⚠️ На это время уже есть запись');return;}
+  if(!n||!ph){showT('⚠️ Заполните имя и телефон');return;}
+  if(!addSelectedDate){showT('⚠️ Выберите дату');return;}
+  if(!addSelectedTime){showT('⚠️ Выберите время из расписания');return;}
+  if(myPatients.some(p=>!p.archived&&p.date===addSelectedDate&&p.time===addSelectedTime)){showT('⚠️ Этот слот уже занят');return;}
   const addBtn=document.getElementById('add-btn');
   addBtn.disabled=true; addBtn.textContent='⏳ Сохранение...';
   try{
     await addDoc(collection(db,'patients'),{
-      docId:currentUser.uid, name:n, phone:ph, date:d, time:t,
+      docId:currentUser.uid, name:n, phone:ph, date:addSelectedDate, time:addSelectedTime,
       notes:document.getElementById('iNt').value.trim(),
       price:parseFloat(document.getElementById('iPr').value)||0,
       paid:0, tooth:document.getElementById('iTooth').value.trim(),
@@ -1131,7 +1312,6 @@ function renderDashboard(){
   const notCamePct=total>0?Math.round(notCameCount/total*100):0;
   const fmtS=n=>n>=1000?(n/1000).toFixed(1).replace('.0','')+'к':n;
 
-  // Chart
   let chartHtml='';
   if(dashPeriod===0){
     const hours=[];
@@ -1151,7 +1331,6 @@ function renderDashboard(){
     chartHtml=`<div class="card"><div class="card-title">📅 По месяцам</div>${months.map(([m,cnt])=>`<div class="dash-bar-row"><span class="dash-bar-lbl" style="width:30px">${MONTHS_RU[parseInt(m.slice(5))-1].slice(0,3)}</span><div class="dash-bar"><div class="dash-bar-fill" style="width:${Math.max(8,Math.round(cnt/mx*100))}%"><span class="dash-bar-val">${cnt}</span></div></div></div>`).join('')}</div>`;
   }
 
-  // Debtors
   const debtByPhone={};
   all.filter(p=>(p.price||0)>(p.paid||0)).forEach(p=>{
     if(!debtByPhone[p.phone])debtByPhone[p.phone]={name:p.name,phone:p.phone,debt:0};
@@ -1195,7 +1374,6 @@ function updateSettingsUI(){
   if(av) av.innerHTML=ph?`<img src="${ph}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:'👩‍⚕️';
   document.getElementById('sh-name').textContent=d.name||'Мой профиль';
   document.getElementById('sh-spec').textContent=d.spec||'Нажмите чтобы заполнить';
-  // Pre-fill modals
   document.getElementById('prof-name').value=d.name||'';
   document.getElementById('prof-spec').value=d.spec||'';
   document.getElementById('prof-phone').value=d.phone||'';
@@ -1321,9 +1499,6 @@ window.showT = function(msg){
   t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2800);
 };
-
-// Init
-document.getElementById('iD').value=today();
 </script>
 </body>
 </html>

@@ -260,6 +260,13 @@ input:checked+.day-tsl:before{transform:translateX(17px)}
 .slots-empty{text-align:center;padding:18px;color:var(--muted);font-size:13px;background:var(--bg);border-radius:12px}
 .slots-no-schedule{background:var(--gold-light);border:1px solid rgba(212,168,75,.3);border-radius:12px;padding:12px 14px;font-size:13px;color:#8a6820;display:flex;align-items:center;gap:8px}
 .selected-slot-badge{display:inline-flex;align-items:center;gap:6px;background:var(--teal-light);color:var(--teal);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:700;margin-top:8px}
+
+/* CLINIC INFO BLOCK */
+.clinic-info-block{background:var(--teal-light);border-radius:14px;padding:13px 14px;margin-bottom:10px;border:1px solid rgba(26,107,90,.12)}
+.clinic-info-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);margin-bottom:10px}
+.clinic-info-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);margin-bottom:6px}
+.clinic-info-row:last-child{margin-bottom:0}
+.clinic-info-ico{font-size:15px;flex-shrink:0;width:20px;text-align:center}
 </style>
 </head>
 <body>
@@ -412,13 +419,17 @@ input:checked+.day-tsl:before{transform:translateX(17px)}
         <div id="sh-avatar" style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 10px;border:3px solid rgba(255,255,255,.3)">👩‍⚕️</div>
         <div id="sh-name" style="font-family:'Playfair Display',serif;font-size:20px;color:white;font-weight:600;margin-bottom:3px">Мой профиль</div>
         <div id="sh-spec" style="font-size:13px;color:rgba(255,255,255,.8)">Нажмите чтобы заполнить</div>
+        <!-- Clinic info preview in hero -->
+        <div id="sh-clinic" style="margin-top:10px;display:none">
+          <div id="sh-clinic-inner" style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 12px;font-size:12px;color:rgba(255,255,255,.9);text-align:left"></div>
+        </div>
       </div>
     </div>
     <div style="margin-bottom:14px">
       <div class="setting-section-title">Настройки</div>
       <div style="margin:0 14px">
         <div class="setting-row" onclick="openModal('modal-profile')">
-          <div class="setting-ico">👤</div><div class="setting-body"><div class="setting-label">Профиль</div><div class="setting-sub" id="srow-name">Имя и специальность</div></div><div style="color:var(--muted)">›</div>
+          <div class="setting-ico">👤</div><div class="setting-body"><div class="setting-label">Профиль и клиника</div><div class="setting-sub" id="srow-name">Имя, специальность и адрес</div></div><div style="color:var(--muted)">›</div>
         </div>
         <div class="setting-row" onclick="openModal('modal-schedule')" style="border-bottom:none;border-radius:0 0 14px 14px">
           <div class="setting-ico">📅</div><div class="setting-body"><div class="setting-label">График работы</div><div class="setting-sub" id="srow-schedule">Дни и часы приёма</div></div><div style="color:var(--muted)">›</div>
@@ -499,6 +510,7 @@ input:checked+.day-tsl:before{transform:translateX(17px)}
   </div>
 </div>
 
+<!-- ══ PROFILE MODAL (расширенный) ══ -->
 <div class="mover" id="modal-profile">
   <div class="modal">
     <button class="mclose" onclick="closeModal('modal-profile')">✕</button>
@@ -511,10 +523,28 @@ input:checked+.day-tsl:before{transform:translateX(17px)}
       <div style="font-size:11px;color:var(--muted);margin-top:4px">Нажмите для фото</div>
       <input type="file" id="prof-photo-input" accept="image/*" style="display:none" onchange="uploadDoctorPhoto(event)">
     </div>
+
+    <!-- Личные данные -->
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);margin-bottom:10px">👤 Личные данные</div>
     <div class="fr"><label class="fl">Имя и фамилия</label><input class="fi" id="prof-name" placeholder="Айгуль Маратова"></div>
     <div class="fr"><label class="fl">Специальность</label><input class="fi" id="prof-spec" placeholder="Стоматолог-терапевт"></div>
     <div class="fr"><label class="fl">WhatsApp для напоминаний</label><input class="fi" id="prof-phone" placeholder="+996 700 000 000" type="tel" oninput="enforcePrefix('prof-phone')"></div>
     <div class="fr"><label class="fl">О себе (необяз.)</label><textarea class="fi" id="prof-bio" placeholder="Опыт, кабинет..."></textarea></div>
+
+    <!-- Клиника / Рабочее место -->
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);margin:16px 0 10px">🏥 Рабочее место</div>
+    <div class="fr"><label class="fl">Название клиники / кабинета</label><input class="fi" id="prof-clinic" placeholder="Стоматология Smile"></div>
+    <div class="fr2">
+      <div><label class="fl">Этаж</label><input class="fi" id="prof-floor" placeholder="2" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"></div>
+      <div><label class="fl">Кабинет №</label><input class="fi" id="prof-room" placeholder="204"></div>
+    </div>
+    <div class="fr"><label class="fl">Адрес</label><input class="fi" id="prof-address" placeholder="ул. Чуй 123, Бишкек"></div>
+    <div class="fr">
+      <label class="fl">Ссылка 2ГИС</label>
+      <input class="fi" id="prof-2gis" placeholder="https://2gis.kg/bishkek/firm/..." type="url">
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Вставьте ссылку из приложения 2ГИС</div>
+    </div>
+
     <button class="btn btn-primary" onclick="saveProfile()">💾 Сохранить</button>
   </div>
 </div>
@@ -590,10 +620,12 @@ let editId = null;
 let allTab = 0;
 let allFilter = '';
 let dashPeriod = 0;
-
-// Selected slot state for add form
 let addSelectedDate = null;
 let addSelectedTime = null;
+
+// ════ DEBT HELPER ════
+// ✅ ИСПРАВЛЕНИЕ: долг показываем только если лечение завершено (procStatus === 'done')
+const calcDebt = p => p.procStatus === 'done' ? Math.max(0, (p.price||0) - (p.paid||0)) : 0;
 
 // ════ AUTH ════
 onAuthStateChanged(auth, async user => {
@@ -605,6 +637,7 @@ onAuthStateChanged(auth, async user => {
       const def = {
         uid: user.uid, name: user.displayName||'', email: user.email||'',
         photoURL: user.photoURL||'', spec:'', phone:'', bio:'',
+        clinic:'', floor:'', room:'', address:'', gis2:'',
         schedule: defaultSchedule(), slotDuration: 30, createdAt: serverTimestamp()
       };
       await setDoc(ref, def);
@@ -690,7 +723,8 @@ function renderToday(){
     .sort((a,b)=>a.time.localeCompare(b.time));
 
   const earned = todayPts.filter(p=>p.procStatus==='done').reduce((s,p)=>s+(p.paid||0),0);
-  const totalDebt = myPatients.filter(p=>!p.archived).reduce((s,p)=>s+Math.max(0,(p.price||0)-(p.paid||0)),0);
+  // ✅ ИСПРАВЛЕНИЕ: считаем долги только по завершённым приёмам
+  const totalDebt = myPatients.filter(p=>!p.archived).reduce((s,p)=>s+calcDebt(p),0);
   const fmtS = n=>n>=1000?(n/1000).toFixed(1).replace('.0','')+'к':n;
 
   document.getElementById('day-summary').innerHTML=`
@@ -742,7 +776,8 @@ function renderToday(){
     const st=p.visitStatus||'waiting';
     const pr=p.procStatus||'';
     const dotCls=pr==='done'?'done':st==='came'?'came':st==='notcame'?'notcame':isNow?'came':'waiting';
-    const debt=Math.max(0,(p.price||0)-(p.paid||0));
+    // ✅ ИСПРАВЛЕНИЕ: долг только если done
+    const debt = calcDebt(p);
     html+=`<div class="tl-item">
       <div class="tl-time">${p.time}</div>
       <div class="tl-line">
@@ -786,7 +821,8 @@ function renderAll(){
     if(!byPhone[p.phone]) byPhone[p.phone]={phone:p.phone,name:p.name,visits:[],latestDate:'',totalDebt:0,totalPaid:0};
     byPhone[p.phone].visits.push(p);
     if(p.date>byPhone[p.phone].latestDate) byPhone[p.phone].latestDate=p.date;
-    byPhone[p.phone].totalDebt+=Math.max(0,(p.price||0)-(p.paid||0));
+    // ✅ ИСПРАВЛЕНИЕ: долг только если done
+    byPhone[p.phone].totalDebt += calcDebt(p);
     byPhone[p.phone].totalPaid+=(p.paid||0);
   });
   const avatarColor=name=>{
@@ -853,7 +889,8 @@ function renderAll(){
   let html='', lastDate='';
   list.forEach(p=>{
     if(p.date!==lastDate){ html+=`<div class="ddiv">${p.date===t?'📅 Сегодня':fmtDFull(p.date)}</div>`; lastDate=p.date; }
-    const debt=Math.max(0,(p.price||0)-(p.paid||0));
+    // ✅ ИСПРАВЛЕНИЕ: долг только если done
+    const debt = calcDebt(p);
     const isPast=p.date<t;
     const cls=debt>0?'debt':p.procStatus==='done'?'done':isPast?'past':'upcoming';
     const visits=myPatients.filter(x=>x.phone===p.phone&&!x.archived).length;
@@ -885,7 +922,7 @@ function renderAllFilters(filters){
 function getScheduleForDate(dateStr) {
   if(!currentDocData?.schedule) return null;
   const d = new Date(dateStr + 'T00:00:00');
-  const dow = d.getDay(); // 0=Sun ... 6=Sat
+  const dow = d.getDay();
   const sched = currentDocData.schedule[dow];
   if(!sched || !sched.on) return null;
   return sched;
@@ -894,23 +931,14 @@ function getScheduleForDate(dateStr) {
 function generateSlots(dateStr) {
   const sched = getScheduleForDate(dateStr);
   if(!sched) return null;
-
   const dur = currentDocData?.slotDuration || 30;
   const slots = [];
-
-  const timeToMin = t => {
-    if(!t) return null;
-    const [h,m] = t.split(':').map(Number);
-    return h*60+m;
-  };
-
+  const timeToMin = t => { if(!t) return null; const [h,m] = t.split(':').map(Number); return h*60+m; };
   const fromMin = timeToMin(sched.from);
   const toMin = timeToMin(sched.to);
   const breakFrom = timeToMin(sched.breakFrom);
   const breakTo = timeToMin(sched.breakTo);
-
   if(fromMin == null || toMin == null) return null;
-
   for(let m = fromMin; m + dur <= toMin; m += dur) {
     const h = Math.floor(m/60), min = m%60;
     const timeStr = `${s2(h)}:${s2(min)}`;
@@ -924,7 +952,6 @@ function generateSlots(dateStr) {
 function renderDateRow(containerId, selectedDate, onSelectDate) {
   const container = document.getElementById(containerId);
   if(!container) return;
-
   const days = [];
   const now = new Date();
   for(let i = 0; i < 14; i++) {
@@ -934,7 +961,6 @@ function renderDateRow(containerId, selectedDate, onSelectDate) {
     const sched = getScheduleForDate(ds);
     days.push({ ds, d, isWorkDay: !!sched });
   }
-
   container.innerHTML = days.map(({ds, d, isWorkDay}) => {
     const isOn = ds === selectedDate;
     return `<div class="slot-day-btn ${isOn?'on':''} ${!isWorkDay?'off':''}" 
@@ -946,84 +972,52 @@ function renderDateRow(containerId, selectedDate, onSelectDate) {
   }).join('');
 }
 
-function renderSlotsArea(slotsAreaId, selectedBadgeId, dateStr, selectedTime, onSelectTime) {
+function renderSlotsArea(slotsAreaId, selectedBadgeId, dateStr, selectedTime) {
   const area = document.getElementById(slotsAreaId);
   const badge = document.getElementById(selectedBadgeId);
   if(!area) return;
-
-  if(!dateStr) {
-    area.innerHTML = '';
-    if(badge) badge.innerHTML = '';
-    return;
-  }
-
+  if(!dateStr) { area.innerHTML=''; if(badge) badge.innerHTML=''; return; }
   if(!currentDocData?.schedule) {
     area.innerHTML = `<div class="slots-no-schedule">⚙️ Сначала настройте график работы в Профиле</div>`;
-    if(badge) badge.innerHTML = '';
-    return;
+    if(badge) badge.innerHTML=''; return;
   }
-
   const sched = getScheduleForDate(dateStr);
-  if(!sched) {
-    area.innerHTML = `<div class="slots-empty">😴 В этот день вы не работаете</div>`;
-    if(badge) badge.innerHTML = '';
-    return;
-  }
-
+  if(!sched) { area.innerHTML=`<div class="slots-empty">😴 В этот день вы не работаете</div>`; if(badge) badge.innerHTML=''; return; }
   const slots = generateSlots(dateStr);
-  if(!slots || !slots.length) {
-    area.innerHTML = `<div class="slots-empty">Нет доступных слотов</div>`;
-    if(badge) badge.innerHTML = '';
-    return;
-  }
-
+  if(!slots || !slots.length) { area.innerHTML=`<div class="slots-empty">Нет доступных слотов</div>`; if(badge) badge.innerHTML=''; return; }
   const freeCount = slots.filter(s => !s.isBreak && !s.isTaken).length;
-
   area.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <span style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">
-        Слоты · ${currentDocData.slotDuration||30} мин
-      </span>
+      <span style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Слоты · ${currentDocData.slotDuration||30} мин</span>
       <span style="font-size:11px;color:var(--teal);font-weight:700">${freeCount} свободных</span>
     </div>
     <div class="slots-grid">
       ${slots.map(sl => {
-        let cls = '';
-        let label = sl.time;
-        if(sl.isBreak) { cls = 'break-slot'; label = `${sl.time}<br><span style="font-size:9px">обед</span>`; }
-        else if(sl.isTaken) { cls = 'taken'; label = `${sl.time}<br><span style="font-size:9px">занято</span>`; }
-        else if(sl.time === selectedTime) cls = 'on';
-        const clickable = !sl.isBreak && !sl.isTaken;
-        return `<div class="slot-btn ${cls}" ${clickable ? `onclick="selectAddTime('${sl.time}')"` : ''}>${label}</div>`;
+        let cls='', label=sl.time;
+        if(sl.isBreak){cls='break-slot';label=`${sl.time}<br><span style="font-size:9px">обед</span>`;}
+        else if(sl.isTaken){cls='taken';label=`${sl.time}<br><span style="font-size:9px">занято</span>`;}
+        else if(sl.time===selectedTime) cls='on';
+        const clickable=!sl.isBreak&&!sl.isTaken;
+        return `<div class="slot-btn ${cls}" ${clickable?`onclick="selectAddTime('${sl.time}')"`:''}>${label}</div>`;
       }).join('')}
     </div>`;
-
-  if(badge) {
-    if(selectedTime && dateStr) {
-      badge.innerHTML = `<div class="selected-slot-badge">✅ ${fmtD(dateStr)} · ${selectedTime}</div>`;
-    } else {
-      badge.innerHTML = '';
-    }
+  if(badge){
+    badge.innerHTML = selectedTime&&dateStr ? `<div class="selected-slot-badge">✅ ${fmtD(dateStr)} · ${selectedTime}</div>` : '';
   }
 }
 
-window.selectAddDate = function(ds) {
-  addSelectedDate = ds;
-  addSelectedTime = null;
+window.selectAddDate = function(ds){
+  addSelectedDate=ds; addSelectedTime=null;
   renderDateRow('add-date-row', addSelectedDate, selectAddDate);
-  renderSlotsArea('add-slots-area', 'add-selected-slot', addSelectedDate, addSelectedTime, selectAddTime);
+  renderSlotsArea('add-slots-area','add-selected-slot',addSelectedDate,addSelectedTime);
 };
-
-window.selectAddTime = function(time) {
-  addSelectedTime = time;
-  renderSlotsArea('add-slots-area', 'add-selected-slot', addSelectedDate, addSelectedTime, selectAddTime);
+window.selectAddTime = function(time){
+  addSelectedTime=time;
+  renderSlotsArea('add-slots-area','add-selected-slot',addSelectedDate,addSelectedTime);
 };
-
-function refreshAddSlots() {
+function refreshAddSlots(){
   renderDateRow('add-date-row', addSelectedDate, selectAddDate);
-  if(addSelectedDate) {
-    renderSlotsArea('add-slots-area', 'add-selected-slot', addSelectedDate, addSelectedTime, selectAddTime);
-  }
+  if(addSelectedDate) renderSlotsArea('add-slots-area','add-selected-slot',addSelectedDate,addSelectedTime);
 }
 
 // ════ ADD PATIENT ════
@@ -1033,11 +1027,9 @@ function resetAddForm(){
   const det=document.getElementById('add-details');if(det)det.style.display='none';
   const ico=document.getElementById('add-details-ico');if(ico)ico.textContent='＋';
   const btn=document.getElementById('add-details-btn');if(btn){btn.style.color='var(--muted)';btn.style.borderColor='var(--border)';}
-  // Reset slot selection
-  addSelectedDate = today();
-  addSelectedTime = null;
+  addSelectedDate=today(); addSelectedTime=null;
   renderDateRow('add-date-row', addSelectedDate, selectAddDate);
-  renderSlotsArea('add-slots-area', 'add-selected-slot', addSelectedDate, addSelectedTime, selectAddTime);
+  renderSlotsArea('add-slots-area','add-selected-slot',addSelectedDate,addSelectedTime);
 }
 
 window.toggleAddDetails = function(){
@@ -1092,10 +1084,7 @@ window.setVisit = async function(fid,status){
   showT({waiting:'⏳ Ожидается',came:'✅ Пришёл',notcame:'❌ Не пришёл'}[status]);
 };
 window.setProc = async function(fid,status){
-  const p=myPatients.find(x=>x.firestoreId===fid);if(!p)return;
-  const upd={procStatus:status};
-  if(status==='done'&&p.price&&!p.paid) upd.paid=p.price;
-  await updateDoc(doc(db,'patients',fid),upd);
+  await updateDoc(doc(db,'patients',fid),{procStatus:status});
   showT(status==='done'?'🎉 Завершено!':'🔧 В процессе');
 };
 window.payDebt = async function(fid,maxDebt){
@@ -1172,17 +1161,39 @@ window.confirmRepeat = async function(){
 };
 
 // ════ WHATSAPP ════
+
+// Строит блок с адресом/кабинетом для WA-сообщения
+function buildClinicBlock(d) {
+  if(!d) return '';
+  const lines = [];
+  if(d.clinic) lines.push(`🏥 ${d.clinic}`);
+  const loc = [d.floor ? `${d.floor} этаж` : '', d.room ? `кабинет ${d.room}` : ''].filter(Boolean).join(', ');
+  if(loc) lines.push(`🚪 ${loc}`);
+  if(d.address) lines.push(`📍 ${d.address}`);
+  if(d.gis2) lines.push(`🗺 ${d.gis2}`);
+  return lines.length ? '\n\n' + lines.join('\n') : '';
+}
+
 window.sendWA = async function(fid){
   const p=myPatients.find(x=>x.firestoreId===fid);if(!p)return;
   const d=currentDocData;
-  const msg=encodeURIComponent(`Здравствуйте, ${p.name}! 🦷\n\nНапоминаем о вашем визите:\n📅 ${fmtDFull(p.date)} в ${p.time}\n👩‍⚕️ ${d?.name||'Ваш врач'}\n\nДо встречи! 😊`);
+  const clinicBlock = buildClinicBlock(d);
+  const msg=encodeURIComponent(
+    `Здравствуйте, ${p.name}! 🦷\n\nНапоминаем о вашем визите:\n📅 ${fmtDFull(p.date)} в ${p.time}\n👩‍⚕️ ${d?.name||'Ваш врач'}${d?.spec?' · '+d.spec:''}${clinicBlock}\n\nДо встречи! 😊`
+  );
   window.open(`https://wa.me/${normPhone(p.phone)}?text=${msg}`,'_blank');
 };
+
 window.sendDebtWA = function(phone){
   const visits=myPatients.filter(p=>p.phone===phone&&!p.archived);
   const name=visits[0]?.name||'';
-  const totalDebt=visits.reduce((s,p)=>s+Math.max(0,(p.price||0)-(p.paid||0)),0);
-  const msg=encodeURIComponent(`Здравствуйте, ${name}! 🦷\n\nНапоминаем об оплате за лечение.\nОбщий долг: ${totalDebt.toLocaleString()} сом.\n\nСпасибо! 😊`);
+  // ✅ ИСПРАВЛЕНИЕ: долг только если done
+  const totalDebt=visits.reduce((s,p)=>s+calcDebt(p),0);
+  const d=currentDocData;
+  const clinicBlock = buildClinicBlock(d);
+  const msg=encodeURIComponent(
+    `Здравствуйте, ${name}! 🦷\n\nНапоминаем об оплате за лечение.\nОбщий долг: ${totalDebt.toLocaleString()} сом.${clinicBlock}\n\nСпасибо! 😊`
+  );
   window.open(`https://wa.me/${normPhone(phone)}?text=${msg}`,'_blank');
 };
 
@@ -1192,7 +1203,8 @@ window.openPatientHistory = function(phone){
   if(!visits.length){showT('Нет данных');return;}
   const name=visits[0].name;
   const totalPaid=visits.reduce((s,v)=>s+(v.paid||0),0);
-  const totalDebt=visits.reduce((s,v)=>s+Math.max(0,(v.price||0)-(v.paid||0)),0);
+  // ✅ ИСПРАВЛЕНИЕ: долг только если done
+  const totalDebt=visits.reduce((s,v)=>s+calcDebt(v),0);
   const t=today();
   const nextVisit=myPatients.filter(p=>p.phone===phone&&!p.archived&&p.date>=t)
     .sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time))[0];
@@ -1240,7 +1252,8 @@ window.openPatientHistory = function(phone){
   <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--mid);margin-bottom:8px">📋 История визитов</div>`;
 
   visits.forEach(v=>{
-    const vd=Math.max(0,(v.price||0)-(v.paid||0));
+    // ✅ ИСПРАВЛЕНИЕ: долг только если done
+    const vd = calcDebt(v);
     html+=`<div class="hist-visit ${v.procStatus==='done'?'done':''}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
@@ -1250,7 +1263,7 @@ window.openPatientHistory = function(phone){
         </div>
         <div style="text-align:right;flex-shrink:0;margin-left:8px;display:flex;flex-direction:column;align-items:flex-end;gap:3px">
           ${v.price>0?`<div class="hist-money">${v.price.toLocaleString()} сом</div>`:''}
-          ${vd>0?`<div class="hist-debt">−${vd.toLocaleString()}</div>`:''}
+          ${vd>0?`<div class="hist-debt">−${vd.toLocaleString()} долг</div>`:''}
           ${v.procStatus==='done'?'<div style="font-size:11px;color:#4caf50;font-weight:600">✅ Завершено</div>':''}
           ${v.visitStatus==='notcame'?'<div style="font-size:11px;color:#bbb">❌ Не пришёл</div>':''}
           <button onclick="openEdit('${v.firestoreId}');closeModal('modal-patient-hist')" style="background:var(--bg);border:none;border-radius:8px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--mid);font-family:'Nunito',sans-serif">✏️ Изм.</button>
@@ -1305,7 +1318,8 @@ function renderDashboard(){
 
   const total=filtered.length;
   const totalEarned=filtered.reduce((s,p)=>s+(p.paid||0),0);
-  const totalDebt=all.reduce((s,p)=>s+Math.max(0,(p.price||0)-(p.paid||0)),0);
+  // ✅ ИСПРАВЛЕНИЕ: долг только если done
+  const totalDebt=all.reduce((s,p)=>s+calcDebt(p),0);
   const paidV=filtered.filter(p=>p.price>0);
   const avgCheck=paidV.length>0?Math.round(totalEarned/paidV.length):0;
   const notCameCount=filtered.filter(p=>p.visitStatus==='notcame').length;
@@ -1332,7 +1346,8 @@ function renderDashboard(){
   }
 
   const debtByPhone={};
-  all.filter(p=>(p.price||0)>(p.paid||0)).forEach(p=>{
+  // ✅ ИСПРАВЛЕНИЕ: должники только среди завершённых приёмов с недоплатой
+  all.filter(p=>p.procStatus==='done'&&(p.price||0)>(p.paid||0)).forEach(p=>{
     if(!debtByPhone[p.phone])debtByPhone[p.phone]={name:p.name,phone:p.phone,debt:0};
     debtByPhone[p.phone].debt+=Math.max(0,(p.price||0)-(p.paid||0));
   });
@@ -1374,10 +1389,36 @@ function updateSettingsUI(){
   if(av) av.innerHTML=ph?`<img src="${ph}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:'👩‍⚕️';
   document.getElementById('sh-name').textContent=d.name||'Мой профиль';
   document.getElementById('sh-spec').textContent=d.spec||'Нажмите чтобы заполнить';
+
+  // Клиника в hero
+  const clinicBlock = document.getElementById('sh-clinic');
+  const clinicInner = document.getElementById('sh-clinic-inner');
+  const hasClinc = d.clinic||d.address||d.room||d.floor||d.gis2;
+  if(clinicBlock && clinicInner) {
+    if(hasClinc) {
+      clinicBlock.style.display='block';
+      const parts=[];
+      if(d.clinic) parts.push(`🏥 ${d.clinic}`);
+      const loc=[d.floor?`${d.floor} эт.`:'',d.room?`каб. ${d.room}`:''].filter(Boolean).join(', ');
+      if(loc) parts.push(`🚪 ${loc}`);
+      if(d.address) parts.push(`📍 ${d.address}`);
+      clinicInner.innerHTML = parts.join('&nbsp;&nbsp;·&nbsp;&nbsp;');
+      if(d.gis2) clinicInner.innerHTML += `<br><a href="${d.gis2}" target="_blank" style="color:rgba(255,255,255,.9);font-size:11px;text-decoration:underline">🗺 Открыть в 2ГИС</a>`;
+    } else {
+      clinicBlock.style.display='none';
+    }
+  }
+
+  // Форма профиля
   document.getElementById('prof-name').value=d.name||'';
   document.getElementById('prof-spec').value=d.spec||'';
   document.getElementById('prof-phone').value=d.phone||'';
   document.getElementById('prof-bio').value=d.bio||'';
+  document.getElementById('prof-clinic').value=d.clinic||'';
+  document.getElementById('prof-floor').value=d.floor||'';
+  document.getElementById('prof-room').value=d.room||'';
+  document.getElementById('prof-address').value=d.address||'';
+  document.getElementById('prof-2gis').value=d.gis2||'';
   const pp=document.getElementById('prof-photo-preview');
   if(pp) pp.innerHTML=ph?`<img src="${ph}" alt=""><div class="doc-photo-overlay"><span>📷</span></div>`:`<span>👩‍⚕️</span><div class="doc-photo-overlay"><span>📷</span></div>`;
   renderScheduleEditor(d);
@@ -1385,7 +1426,17 @@ function updateSettingsUI(){
 }
 
 window.saveProfile = async function(){
-  const upd={name:document.getElementById('prof-name').value.trim(),spec:document.getElementById('prof-spec').value.trim(),phone:document.getElementById('prof-phone').value.trim(),bio:document.getElementById('prof-bio').value.trim()};
+  const upd={
+    name:document.getElementById('prof-name').value.trim(),
+    spec:document.getElementById('prof-spec').value.trim(),
+    phone:document.getElementById('prof-phone').value.trim(),
+    bio:document.getElementById('prof-bio').value.trim(),
+    clinic:document.getElementById('prof-clinic').value.trim(),
+    floor:document.getElementById('prof-floor').value.trim(),
+    room:document.getElementById('prof-room').value.trim(),
+    address:document.getElementById('prof-address').value.trim(),
+    gis2:document.getElementById('prof-2gis').value.trim()
+  };
   Object.assign(currentDocData,upd);
   await updateDoc(doc(db,'doctors',currentUser.uid),upd);
   closeModal('modal-profile');updateSettingsUI();showT('✅ Профиль сохранён');
@@ -1461,7 +1512,7 @@ window.saveSchedule = async function(){
 window.exportExcel = function(){
   const rows=[['Имя','Телефон','Дата','Время','Зуб №','Процедура','Стоимость','Оплачено','Долг','Статус']];
   myPatients.filter(p=>!p.archived).sort((a,b)=>b.date.localeCompare(a.date)).forEach(p=>{
-    const debt=Math.max(0,(p.price||0)-(p.paid||0));
+    const debt=calcDebt(p);
     const status=p.procStatus==='done'?'Завершено':p.visitStatus==='notcame'?'Не пришёл':p.visitStatus==='came'?'На приёме':'Ожидает';
     rows.push([p.name,p.phone,p.date,p.time,p.tooth||'',p.notes||'',(p.price||0),(p.paid||0),debt,status]);
   });
